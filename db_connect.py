@@ -16,6 +16,12 @@ try:
     with connection.cursor() as cursor:
         pass
 
+    # create table in PostgreSQL
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """CREATE TABLE """
+        )
+
 except Exception as _ex:
     print('[INFO] Error while working with POstgreSQL', _ex)
 finally:
