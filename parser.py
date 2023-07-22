@@ -4,6 +4,7 @@ from io import BytesIO
 from bs4 import BeautifulSoup
 import json
 from config import WALLET
+import datetime
 
 
 def get_data(url):
@@ -33,19 +34,31 @@ def get_data(url):
             'tokenAbbr': transfer['tokenInfo']['tokenAbbr']
         }
 
-    with open('usdt.txt', 'w') as file:
+    with open('usdt.txt', 'r') as file:
+        data = file.readlines()
+        existing_ids = set()
+        for line in data:
+            transfer = json.loads(line)
+            existing_ids.add(transfer['transaction_id'])
+
+    with open('usdt.txt', 'a') as file:
         for transfer in token_transfers:
+            now = datetime.datetime.now().strftime('%H:%M')
             dict_ = {
+                'tokenAbbr': transfer['tokenInfo']['tokenAbbr'],
                 'quant': transfer['quant'],
                 'from_address': transfer['from_address'],
                 'to_address': transfer['to_address'],
                 'transaction_id': transfer['transaction_id'],
-                'tokenAbbr': transfer['tokenInfo']['tokenAbbr']
+                'time': now,
+                'send_message': False
             }
             if transfer['to_address'] == come_in and len(transfer['quant']) > 6 and transfer['tokenInfo']['tokenAbbr'] == 'USDT':
-                print(dict_)
-                json.dump(dict_, file)
-                file.write('\n')
+                if dict_['transaction_id'] not in existing_ids:
+                    json.dump(dict_, file)
+                    file.write('\n')
+                    existing_ids.add(dict_['transaction_id'])
+                    print('add record')
 
     with open('json.txt', 'w') as file:
         file.write(json.dumps(parsed_data, indent=4))
