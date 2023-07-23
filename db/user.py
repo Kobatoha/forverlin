@@ -10,6 +10,8 @@ class User(BaseModel):
 
     username = Column(VARCHAR(32), unique=False, nullable=True)
 
+    tronscan_account = Column(VARCHAR(250), unique=True, nullable=True, primary_key=True)
+
     reg_date = Column(DATE, default=datetime.date.today())
 
     upd_date = Column(DATE, onupdate=datetime.date.today())

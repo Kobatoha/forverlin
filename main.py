@@ -1,5 +1,5 @@
 from aiogram import Bot, Dispatcher, executor, types
-from config import TOKEN, TELEGRAM_ID
+from config import TOKEN, TELEGRAM_ID, DB_URL
 from parser import main
 import json
 import datetime
@@ -9,6 +9,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
 tg_account = TELEGRAM_ID
+
 
 @dp.message_handler(commands=['active'])
 async def send_welcome(message: types.Message):

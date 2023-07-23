@@ -5,17 +5,6 @@ from bs4 import BeautifulSoup
 import json
 from config import WALLET
 import datetime
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from config import DB_URL
-from models import Base, Transactions, User
-
-engine = create_engine(DB_URL)
-
-Session = sessionmaker(bind=engine)
-
-Base.metadata.create_all(engine)
 
 
 def get_data(url):

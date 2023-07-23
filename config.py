@@ -13,3 +13,5 @@ user = 'postgres'
 password = 'sirok123'
 db_name = 'forverlin'
 port = 5433
+
+DB_URL = f'postgresql://{user}:{password}@{host}:{port}/{db_name}'

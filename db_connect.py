@@ -8,7 +8,7 @@ try:
         host=host,
         user=user,
         password=password,
-        database=db_name,
+        db_name=db_name,
         port=port
     )
 
@@ -19,11 +19,17 @@ try:
     # create table in PostgreSQL
     with connection.cursor() as cursor:
         cursor.execute(
-            """CREATE TABLE """
+            """CREATE TABLE users(
+            user_id serial PRIMARY KEY,
+            username
+            tronscan_account
+            reg_date
+            upd_date)
+            """
         )
 
 except Exception as _ex:
-    print('[INFO] Error while working with POstgreSQL', _ex)
+    print('[INFO] Error while working with PostgreSQL', _ex)
 finally:
     if connection:
         connection.close()
