@@ -11,7 +11,6 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     telegram_id = Column(Integer, unique=True, nullable=False)
     wallet = Column(String, unique=True)
-    transactions = relationship('Transactions', backref='user')
 
 
 class Transactions(Base):
@@ -27,4 +26,4 @@ class Transactions(Base):
     date = Column(DATE, default=datetime.date.today())
     time = Column(TIME, default=datetime.datetime.now().time())
     send_message = Column(Boolean, default=False)
-    user_id = Column(Integer, ForeignKey('users.id'))
+

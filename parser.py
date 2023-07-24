@@ -3,13 +3,13 @@ import gzip
 from io import BytesIO
 from bs4 import BeautifulSoup
 import json
-from config import WALLET
+from config import WALLET, TELEGRAM_ID, DB_URL
 import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from config import DB_URL
 from models import Base, Transactions, User
+from datetime import datetime
+
 
 engine = create_engine(DB_URL)
 
@@ -27,8 +27,6 @@ def get_data(url):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
     }
 
-    come_in = WALLET
-
     r = requests.get("https://apilist.tronscanapi.com/api/token_trc20/transfers?limit=50&start=0&sort=-timestamp&count=true&filterTokenValue=0&relatedAddress=TGzNdQBmFqisqsbSwEbBunoBegVQsYALRh",
                      headers=headers)
 
@@ -37,6 +35,7 @@ def get_data(url):
     token_transfers = parsed_data['token_transfers']
 
     for transfer in token_transfers:
+        session = Session()
         dict_ = {
             'quant': transfer['quant'],
             'from_address': transfer['from_address'],
@@ -44,36 +43,20 @@ def get_data(url):
             'transaction_id': transfer['transaction_id'],
             'tokenAbbr': transfer['tokenInfo']['tokenAbbr']
         }
+        if not session.query(Transactions).filter_by(transaction_id=dict_['transaction_id']).first():
+            trans = Transactions(
+                wallet=WALLET,
+                transaction_id=dict_['transaction_id'],
+                token_abbr=dict_['tokenAbbr'],
+                count=dict_['quant'],
+                from_address=dict_['from_address'],
+                to_address=dict_['to_address'],
+            )
 
-    with open('usdt.txt', 'r') as file:
-        data = file.readlines()
-        existing_ids = set()
-        for line in data:
-            transfer = json.loads(line)
-            existing_ids.add(transfer['transaction_id'])
+            session.add(trans)
+            session.commit()
 
-    with open('usdt.txt', 'a') as file:
-        for transfer in token_transfers:
-            now = datetime.datetime.now().strftime('%H:%M')
-            dict_ = {
-                'tokenAbbr': transfer['tokenInfo']['tokenAbbr'],
-                'quant': transfer['quant'],
-                'from_address': transfer['from_address'],
-                'to_address': transfer['to_address'],
-                'transaction_id': transfer['transaction_id'],
-                'time': now,
-                'send_message': False
-            }
-            if transfer['to_address'] == come_in and len(transfer['quant']) > 6 and transfer['tokenInfo']['tokenAbbr'] == 'USDT':
-                if dict_['transaction_id'] not in existing_ids:
-                    json.dump(dict_, file)
-                    file.write('\n')
-                    existing_ids.add(dict_['transaction_id'])
-                    print('add record')
-
-    with open('json.txt', 'w') as file:
-        file.write(json.dumps(parsed_data, indent=4))
-
+        session.close()
 
 def main():
     get_data("https://tronscan.org/#/address/TGzNdQBmFqisqsbSwEbBunoBegVQsYALRh/transfers")
