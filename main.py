@@ -1,12 +1,14 @@
 from aiogram import Bot, Dispatcher, executor, types
 from config import TOKEN, TELEGRAM_ID, DB_URL
-from parser import main
+from parser import parser_main
 import json
 import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base, Transactions, User
 from datetime import datetime
+from aiocron import crontab
+import asyncio
 
 
 engine = create_engine(DB_URL)
@@ -64,28 +66,41 @@ async def send_transaction_info():
 
     users = session.query(User).all()
     for user in users:
+        print(f"Telegram ID: {user.telegram_id}")
+        print(f"Wallet address: {user.wallet}")
         transactions = session.query(Transactions).filter(
             Transactions.to_address == user.wallet,
             Transactions.token_abbr == 'USDT',
-            Transactions.send_message is False,
-            len(Transactions.count) > 6
+            Transactions.send_message == False,
         ).all()
 
         for transaction in transactions:
             count = transaction.count
-            if count[-6:] == '000000':
-                count = count[:-9] + ',' + count[-9:-6]
-            else:
-                count = count[:-9] + ',' + count[-9:-6] + '.' + count[-6:]
+            if len(count) > 6:
+                print(transaction.count)
+                if count[-6:] == '000000':
+                    count = count[:-9] + ',' + count[-9:-6]
+                else:
+                    count = count[:-9] + ',' + count[-9:-6] + '.' + count[-6:]
 
-            message_text = f"+{count} USDT"
-            await bot.send_message(chat_id=user.telegram_id, text=message_text)
+                message_text = f"+{count} USDT"
+                await bot.send_message(chat_id=user.telegram_id, text=message_text)
 
-            transaction.send_message = True
+                transaction.send_message = True
             session.commit()
 
     session.close()
 
 
+async def crontab_parser():
+    # Запускаем парсер каждую минуту
+    crontab('*/1 * * * *', func=parser_main)
+
+    # Запускаем функцию send_transaction_info каждую минуту
+    crontab('*/1 * * * *', func=send_transaction_info)
+
+
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.create_task(crontab_parser())
     executor.start_polling(dp, skip_updates=True)

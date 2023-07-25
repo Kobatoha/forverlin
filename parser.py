@@ -27,7 +27,7 @@ def get_data(url):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
     }
 
-    r = requests.get("https://apilist.tronscanapi.com/api/token_trc20/transfers?limit=50&start=0&sort=-timestamp&count=true&filterTokenValue=0&relatedAddress=TGzNdQBmFqisqsbSwEbBunoBegVQsYALRh",
+    r = requests.get("https://apilist.tronscanapi.com/api/token_trc20/transfers?limit=20&start=0&sort=-timestamp&count=true&filterTokenValue=0&relatedAddress=TGzNdQBmFqisqsbSwEbBunoBegVQsYALRh",
                      headers=headers)
 
     parsed_data = json.loads(r.text)
@@ -58,9 +58,10 @@ def get_data(url):
 
         session.close()
 
-def main():
+
+def parser_main():
     get_data("https://tronscan.org/#/address/TGzNdQBmFqisqsbSwEbBunoBegVQsYALRh/transfers")
 
 
 if __name__ == '__main__':
-    main()
+    parser_main()
