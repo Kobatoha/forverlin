@@ -1,11 +1,5 @@
 # telegram bot token
-TOKEN = '6363183597:AAEBO3qZEwDgZzADTfmxXRlkhOGXIcKYOXc'
-
-# tronscan id wallet
-WALLET = 'TGzNdQBmFqisqsbSwEbBunoBegVQsYALRh'
-
-# telegram id
-TELEGRAM_ID = '952604184'
+TOKEN = '6551664026:AAHGN1_4zfC4Hd5HF_IeAL3Fgy2egVyACkM'
 
 # PostgreSQL db information
 host = 'localhost'
