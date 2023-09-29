@@ -55,6 +55,12 @@ dp.register_callback_query_handler(get_wallet_address,
                                    lambda c: c.data.startswith('get_address_'))                 # [GET WALLET ADDRESS]
 dp.register_message_handler(save_wallet_name, state=WalletNameEdit.waiting_for_new_name)        # [SAVE WALLET NAME]
 dp.register_callback_query_handler(delete_wallet, lambda c: c.data.startswith('delete_'))       # [DELETE WALLET]
+dp.register_callback_query_handler(share_wallet, lambda c: c.data.startswith('share_'))         # [SHARE WALLET]
+dp.register_callback_query_handler(
+    cancel_to_share_wallet,
+    lambda c: c.data.startswith('cancel_to_share_wallet_'),
+    state=ShareWallet.waiting_for_trusted_username)                                             # [CANCEL SHARE WALLET]
+dp.register_message_handler(save_trusted_user, state=ShareWallet.waiting_for_trusted_username)  # [SAVE TRUSTED USER]
 
 
 menu_buttons = types.InlineKeyboardMarkup(row_width=2)
@@ -82,8 +88,6 @@ button_no = types.InlineKeyboardButton(text='<< back', callback_data='back_to_re
 inline_register_buttons.add(button_yes, button_no)
 
 
-
-
 ### BACK TO MENU
 @dp.callback_query_handler(lambda c: c.data == 'back')
 async def back_callback(callback_query: types.CallbackQuery):
@@ -101,137 +105,6 @@ async def back_callback(callback_query: types.CallbackQuery):
         await bot.send_message(chat_id='952604184',
                                text=f'{callback_query.from_user.id} - Произошла ошибка в функции back_callback:'
                                     f' {e}')
-
-
-### SHARE WALLET
-@dp.callback_query_handler(lambda c: c.data.startswith('share_'))
-async def share_wallet(callback_query: types.CallbackQuery, state: FSMContext):
-    try:
-        now = datetime.now().strftime('%H:%M:%S')
-        logging.info(f'[SHARE WALLET] {now}: {callback_query.from_user.id} - {callback_query.from_user.username} '
-                     f'поделиться кошельком')
-        wallet = callback_query.data.split('_')[1]
-
-        # редактирование сообщения с кнопками
-        session = Session()
-        wallet_name = session.query(User.wallet_name).filter_by(wallet=wallet).scalar()
-        session.close()
-
-        text = f'Введите пользователя (@username), который будет получать уведомления с ' \
-               f'{wallet_name} - {wallet[:3]}...{wallet[-3:]}:'
-
-        back_button = types.InlineKeyboardButton(text='<< back', callback_data='cancel_reg_trusted_user')
-        reply_markup = types.InlineKeyboardMarkup()
-        reply_markup.add(back_button)
-
-        await bot.edit_message_text(chat_id=callback_query.message.chat.id,
-                                    message_id=callback_query.message.message_id,
-                                    text=text,
-                                    reply_markup=reply_markup)
-
-        # перевод FSM в статус ожидания ответа
-        await ShareWallet.waiting_for_trusted_username.set()
-        await state.update_data(wallet=wallet)
-
-    except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции share_wallet: {e}')
-        await bot.send_message(chat_id='952604184',
-                               text=f'{callback_query.from_user.id} - Произошла ошибка в функции share_wallet:'
-                                    f' {e}')
-
-
-### CANCEL REGISTRATION TRUSTED USER
-@dp.callback_query_handler(lambda callback_query: callback_query.data == 'cancel_reg_trusted_user',
-                           state=ShareWallet.waiting_for_trusted_username)
-async def cancel_to_register_trusted_user(callback_query: types.CallbackQuery, state: FSMContext):
-    try:
-        now = datetime.now().strftime('%H:%M:%S')
-        logging.info(f'[CANCEL REGISTRATION TRUSTED USER] {now}: {callback_query.from_user.id} - '
-                     f'{callback_query.from_user.username} отмена регистрации доверенного пользователя')
-
-        await bot.answer_callback_query(callback_query.id)
-        await bot.edit_message_text(chat_id=callback_query.from_user.id,
-                                    message_id=callback_query.message.message_id,
-                                    text='Share wallet canceled',
-                                    reply_markup=menu_buttons)
-        await state.finish()
-
-    except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции cancel_to_register_trusted_user: {e}')
-        await bot.send_message(chat_id='952604184',
-                               text=f'{callback_query.from_user.id} - Произошла ошибка в функции '
-                                    f'cancel_to_register_trusted_user: {e}')
-
-
-### ADD TRUSTED USER FOR WALLET
-@dp.message_handler(state=ShareWallet.waiting_for_trusted_username)
-async def process_trusted_username(message: types.Message, state: FSMContext):
-    try:
-        now = datetime.now().strftime('%H:%M:%S')
-        logging.info(f'[ADD TRUSTED USER FOR WALLET] {now}: {message.from_user.id} - {message.from_user.username} '
-                     f'регистрация доверенного пользователя')
-
-        trusted_username = message.text
-
-        # проверка корректности введенного имени пользователя
-        if not trusted_username.startswith('@'):
-            logging.info(f'[ADD TRUSTED USER FOR WALLET] {now}: {message.from_user.id} - {message.from_user.username} '
-                         f'некорректный данные доверенного пользователя')
-            await message.reply('Имя пользователя должно начинаться с символа @. Попробуйте еще раз:')
-            return
-
-        # добавление доверенного пользователя в базу данных
-        data = await state.get_data()
-        wallet = data.get('wallet')
-
-        session = Session()
-        us = session.query(User).filter_by(wallet=wallet).first()
-        tr_us = session.query(TrustedUser).filter_by(wallet=us.wallet).first()
-
-        if tr_us and trusted_username == tr_us.username:
-            logging.info(f'[ADD TRUSTED USER FOR WALLET] {now}: {message.from_user.id} - {message.from_user.username} '
-                         f'доверенный пользователь уже подключен к данному кошельку')
-            await message.reply('Пользователь уже следит за этим кошельком. Повторите попытку или вернитесь назад.')
-            return
-
-        session.close()
-
-        session = Session()
-        user = session.query(User).filter_by(wallet=wallet).first()
-
-        trusted_user = TrustedUser(username=trusted_username, wallet=user.wallet)
-        session.add(trusted_user)
-        session.commit()
-        logging.info(f'[ADD TRUSTED USER FOR WALLET] {now}: {message.from_user.id} - {message.from_user.username} '
-                     f'доверенный пользователь усмпешно подключен к данному кошельку')
-        session.close()
-
-            # отправка сообщения об успешном добавлении пользователя
-        session = Session()
-        wallet_name = session.query(User.wallet_name).filter_by(wallet=wallet).scalar()
-        session.close()
-        text = f'Пользователь {trusted_username} добавлен для слежения за транзакциями в кошельке ' \
-               f'{wallet_name} - {wallet[:3]}...{wallet[-3:]}.\n' \
-               f'Чтобы пользователь {trusted_username} получал уведомления о новых транзакциях, отправьте ему ссылку' \
-               f' на бота, чтобы он авторизовался нажатием на кнопку start'
-        buttons = [
-            types.InlineKeyboardButton(text='Добавить пользователя', callback_data=f'share_{wallet}'),
-            types.InlineKeyboardButton(text='Удалить пользователя', callback_data=f'remove_{wallet}'),
-            types.InlineKeyboardButton(text='<< back', callback_data='mywallets')
-        ]
-        reply_markup = types.InlineKeyboardMarkup(row_width=1)
-        reply_markup.add(*buttons)
-
-        await bot.send_message(chat_id=message.from_user.id, text=text, reply_markup=reply_markup)
-
-        # перевод FSM в статус ожидания следующего действия
-        await state.finish()
-
-    except Exception as e:
-        logging.error(f'{message.from_user.id} - Ошибка в функции process_trusted_username: {e}')
-        await bot.send_message(chat_id='952604184',
-                               text=f'{message.from_user.id} - Произошла ошибка в функции '
-                                    f'process_trusted_username: {e}')
 
 
 ### CLICK TRUSTED USERS FOR WALLET

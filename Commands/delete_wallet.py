@@ -47,10 +47,10 @@ async def delete_wallet(callback_query: types.CallbackQuery):
         session.commit()
         session.close()
 
-        text = 'Кошелек успешно удален!'
-        await bot.answer_callback_query(callback_query.id, text=text)
-        text = '[Регистрация кошелька] - Добавьте свой адрес\n' \
+        text = 'Кошелек успешно удален!\n' \
+               '[Регистрация кошелька] - Добавьте свой адрес\n' \
                '[Мои кошельки] - Измените существующий или создайте новый'
+
         reply_markup = menu_buttons
         await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                     message_id=callback_query.message.message_id,

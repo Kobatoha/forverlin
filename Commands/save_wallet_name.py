@@ -43,22 +43,18 @@ class WalletNameEdit(StatesGroup):
 async def save_wallet_name(message: types.Message, state: FSMContext):
     try:
         new_wallet_name = message.text
-        print(f'Получаемое новое имя кошелька - {new_wallet_name}')
         data = await state.get_data()
         wallet_address = data.get('wallet_address')
-        print(f'Кошелек, к которому применяем изменения - {wallet_address}')
 
         session = Session()
         watch_wallet = session.query(WatchWallet).filter_by(wallet_address=wallet_address).first()
         if watch_wallet:
             watch_wallet.wallet_name = new_wallet_name.strip()
-            print(f'Сохраняем новое название кошелька {new_wallet_name.strip()}')
             session.commit()
 
         else:
             tron_wallet = session.query(WalletTron).filter_by(wallet_address=wallet_address).first()
             tron_wallet.wallet_name = new_wallet_name.strip()
-            print(f'Сохраняем новое название кошелька {new_wallet_name.strip()}')
             session.commit()
         session.close()
 

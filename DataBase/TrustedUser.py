@@ -8,4 +8,4 @@ class TrustedUser(Base):
 
     id = Column(Integer, primary_key=True)
     username = Column(String)
-    wallet_address = Column(String, ForeignKey('watch wallets.wallet_address'))
+    wallet_address = Column(String)

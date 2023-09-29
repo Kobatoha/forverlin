@@ -9,3 +9,5 @@ from Commands.edit_wallet_name import edit_wallet_name, cancel_to_edit_wallet_na
 from Commands.get_wallet_address import get_wallet_address
 from Commands.save_wallet_name import save_wallet_name, WalletNameEdit
 from Commands.delete_wallet import delete_wallet
+from Commands.share_wallet import share_wallet, ShareWallet, cancel_to_share_wallet
+from Commands.save_trusted_user import save_trusted_user, ShareWallet

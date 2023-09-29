@@ -3,7 +3,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import TOKEN, DB_URL
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, join, or_
 from sqlalchemy.orm import sessionmaker
 from DataBase.Base import Base
 from DataBase.User import User
@@ -34,42 +34,55 @@ my_wallets_button = types.InlineKeyboardButton(text='Мои кошельки', c
 menu_buttons.add(register_button, my_wallets_button)
 
 
-class WalletNameEdit(StatesGroup):
-    waiting_for_new_name = State()
+class ShareWallet(StatesGroup):
+    waiting_for_trusted_username = State()
 
 
-# [EDIT WALLET NAME]
-async def edit_wallet_name(callback_query: types.CallbackQuery, state: FSMContext):
+# [SHARE WALLET]
+async def share_wallet(callback_query: types.CallbackQuery, state: FSMContext):
     try:
         wallet_address = callback_query.data.split('_')[1]
 
+        session = Session()
+        wallet_name = session.query(WatchWallet.wallet_name).filter_by(wallet_address=wallet_address).scalar()
+        wallet_tron_name = session.query(WalletTron.wallet_name).filter_by(wallet_address=wallet_address).scalar()
+        session.close()
+
         back_button = types.InlineKeyboardButton(text='Вернуться в предыдущее меню',
-                                                 callback_data=f'cancel_to_edit_wallet_name_{wallet_address}')
+                                                 callback_data=f'cancel_to_share_wallet_{wallet_address}')
         reply_markup = types.InlineKeyboardMarkup()
         reply_markup.add(back_button)
 
-        text = f'Введите новое название для кошелька {wallet_address}:'
-        await bot.edit_message_text(chat_id=callback_query.message.chat.id,
-                                    message_id=callback_query.message.message_id,
-                                    text=text,
-                                    reply_markup=reply_markup)
+        if wallet_name:
+            text = f'Введите пользователя (@username), который будет получать уведомления с ' \
+                   f'кошелька: «{wallet_name}» - {wallet_address[:3]}...{wallet_address[-3:]}:'
+            await bot.edit_message_text(chat_id=callback_query.message.chat.id,
+                                        message_id=callback_query.message.message_id,
+                                        text=text,
+                                        reply_markup=reply_markup)
+        elif wallet_tron_name:
+            text = f'Введите пользователя (@username), который будет получать уведомления с ' \
+                   f'кошелька: «{wallet_tron_name}» - {wallet_address[:3]}...{wallet_address[-3:]}:'
+            await bot.edit_message_text(chat_id=callback_query.message.chat.id,
+                                        message_id=callback_query.message.message_id,
+                                        text=text,
+                                        reply_markup=reply_markup)
 
-        await WalletNameEdit.waiting_for_new_name.set()
+        await ShareWallet.waiting_for_trusted_username.set()
         await state.update_data(wallet_address=wallet_address)
 
     except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции edit_callback: {e}')
+        logging.error(f'{callback_query.from_user.id} - Ошибка в функции share_wallet: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'{callback_query.from_user.id} - Произошла ошибка в функции edit_callback:'
+                               text=f'{callback_query.from_user.id} - Произошла ошибка в функции share_wallet:'
                                     f' {e}')
 
 
-# CANCEL FOR CHANGE WALLET NAME
-@dp.callback_query_handler(lambda c: c.data.startswith('cancel_to_edit_wallet_name_'),
-                           state=WalletNameEdit.waiting_for_new_name)
-async def cancel_to_edit_wallet_name(callback_query: types.CallbackQuery, state: FSMContext):
+# [CANCEL SHARE WALLET] @dp.callback_query_handler(lambda c: c.data.startswith('cancel_to_share_wallet_'
+# '', state=ShareWallet.waiting_for_trusted_username)
+async def cancel_to_share_wallet(callback_query: types.CallbackQuery, state: FSMContext):
     try:
-        wallet_address = callback_query.data.split('_')[5]
+        wallet_address = callback_query.data.split('_')[4]
         buttons = [
             types.InlineKeyboardButton(text='Получить адрес', callback_data=f'get_address_{wallet_address}'),
             types.InlineKeyboardButton(text='Редактировать название', callback_data=f'edit_{wallet_address}'),
@@ -86,13 +99,13 @@ async def cancel_to_edit_wallet_name(callback_query: types.CallbackQuery, state:
         wallet_tron_name = session.query(WalletTron.wallet_name).filter_by(wallet_address=wallet_address).scalar()
         session.close()
         if wallet_name:
-            text = f'Выберите действие с кошельком "{wallet_name}" - "{wallet_address}":'
+            text = f'Выберите действие с кошельком «{wallet_name}» - {wallet_address}:'
             await bot.edit_message_text(chat_id=callback_query.message.chat.id,
                                         message_id=callback_query.message.message_id,
                                         text=text,
                                         reply_markup=reply_markup)
         elif wallet_tron_name:
-            text = f'Выберите действие с кошельком "{wallet_tron_name}" - "{wallet_address}":'
+            text = f'Выберите действие с кошельком «{wallet_tron_name}» - {wallet_address}:'
             await bot.edit_message_text(chat_id=callback_query.message.chat.id,
                                         message_id=callback_query.message.message_id,
                                         text=text,
@@ -101,7 +114,7 @@ async def cancel_to_edit_wallet_name(callback_query: types.CallbackQuery, state:
         await state.finish()
 
     except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции cancel_to_edit_wallet_name: {e}')
+        logging.error(f'{callback_query.from_user.id} - Ошибка в функции cancel_to_share_wallet: {e}')
         await bot.send_message(chat_id='952604184',
                                text=f'{callback_query.from_user.id} - '
-                                    f'Произошла ошибка в функции cancel_to_edit_wallet_name: {e}')
+                                    f'Произошла ошибка в функции cancel_to_share_wallet: {e}')
