@@ -61,6 +61,8 @@ dp.register_callback_query_handler(
     lambda c: c.data.startswith('cancel_to_share_wallet_'),
     state=ShareWallet.waiting_for_trusted_username)                                             # [CANCEL SHARE WALLET]
 dp.register_message_handler(save_trusted_user, state=ShareWallet.waiting_for_trusted_username)  # [SAVE TRUSTED USER]
+dp.register_callback_query_handler(click_trusted_users,
+                                   lambda c: c.data.startswith('trusted_users_'))               # [CLICK TRUSTED USERS]
 
 
 menu_buttons = types.InlineKeyboardMarkup(row_width=2)
