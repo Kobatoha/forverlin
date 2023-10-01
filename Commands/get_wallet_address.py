@@ -10,7 +10,7 @@ from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
 from DataBase.WatchWallet import WatchWallet
-from DataBase.TransactionWatchWallet import TransactionWatchWallet
+from DataBase.Transaction import TransactionWatchWallet
 from datetime import datetime
 from aiocron import crontab
 import asyncio
@@ -34,8 +34,7 @@ my_wallets_button = types.InlineKeyboardButton(text='Мои кошельки', c
 menu_buttons.add(register_button, my_wallets_button)
 
 
-# [GET WALLET ADDRESS] get_address_{wallet_address}
-@dp.callback_query_handler(lambda c: c.data.startswith('get_address_'))
+# [GET WALLET ADDRESS]
 async def get_wallet_address(callback_query: types.CallbackQuery):
     try:
         wallet_address = callback_query.data.split('_')[2]
@@ -52,7 +51,7 @@ async def get_wallet_address(callback_query: types.CallbackQuery):
                                     reply_markup=reply_markup)
 
     except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции get_wallet_address: {e}')
+        logging.error(f' [GET WALLET ADDRESS] {callback_query.from_user.id} - Ошибка в функции get_wallet_address: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'{callback_query.from_user.id} - Произошла ошибка в функции get_wallet_address:'
-                                    f' {e}')
+                               text=f'[GET WALLET ADDRESS] {callback_query.from_user.id} - '
+                                    f'Произошла ошибка в функции get_wallet_address: {e}')

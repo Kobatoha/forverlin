@@ -10,7 +10,7 @@ from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
 from DataBase.WatchWallet import WatchWallet
-from DataBase.TransactionWatchWallet import TransactionWatchWallet
+from DataBase.Transaction import TransactionWatchWallet
 from datetime import datetime
 from aiocron import crontab
 import asyncio
@@ -33,7 +33,6 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 async def click_wallet(callback_query: types.CallbackQuery):
     try:
         wallet_address = callback_query.data.split('_')[1]
-        print(f'Нажимаю кнопку - {wallet_address}')
 
         buttons = [
             types.InlineKeyboardButton(text='Получить адрес', callback_data=f'get_address_{wallet_address}'),
@@ -46,24 +45,19 @@ async def click_wallet(callback_query: types.CallbackQuery):
         reply_markup = types.InlineKeyboardMarkup(row_width=1)
         reply_markup.add(*buttons, back_button)
 
-        # получение названия кошелька из базы данных
         session = Session()
-        wallet_name = session.query(WatchWallet.wallet_name).filter_by(wallet_address=wallet_address).scalar()
-        wallet_tron_name = session.query(WalletTron.wallet_name).filter_by(wallet_address=wallet_address).scalar()
+        wallet_name = session.query(WalletTron.wallet_name).filter_by(wallet_address=wallet_address).scalar()
         session.close()
+
         if wallet_name:
-            text = f'Выберите действие с кошельком "{wallet_name}" - "{wallet_address}":'
+            text = f'Выберите действие с кошельком «{wallet_name}» - «{wallet_address}»:'
             await bot.edit_message_text(chat_id=callback_query.message.chat.id,
                                         message_id=callback_query.message.message_id,
                                         text=text,
                                         reply_markup=reply_markup)
-        elif wallet_tron_name:
-            text = f'Выберите действие с кошельком "{wallet_tron_name}" - "{wallet_address}":'
-            await bot.edit_message_text(chat_id=callback_query.message.chat.id,
-                                        message_id=callback_query.message.message_id,
-                                        text=text,
-                                        reply_markup=reply_markup)
+
     except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции click_wallet: {e}')
+        logging.error(f' [CLICK WALLET] {callback_query.from_user.id} - Ошибка в функции click_wallet: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'{callback_query.from_user.id} - Произошла ошибка в функции click_wallet: {e}')
+                               text=f'[CLICK WALLET] {callback_query.from_user.id} - '
+                                    f'Произошла ошибка в функции click_wallet: {e}')

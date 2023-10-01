@@ -3,12 +3,11 @@ from DataBase.Base import Base
 import datetime
 
 
-# Транзакции, которые относятся только к адресам WatchWallet
-class TransactionWatchWallet(Base):
-    __tablename__ = 'transactions watch wallets'
+class Transaction(Base):
+    __tablename__ = 'transactions tron wallets'
 
     id = Column(Integer, primary_key=True)
-    wallet_address = Column(String, ForeignKey('watch wallets.wallet_address'))
+    wallet_address = Column(String, ForeignKey('wallets tron.wallet_address'))
     transaction_id = Column(String)
     token_abbr = Column(String)
     count = Column(String)

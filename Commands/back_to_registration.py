@@ -10,7 +10,7 @@ from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
 from DataBase.WatchWallet import WatchWallet
-from DataBase.TransactionWatchWallet import TransactionWatchWallet
+from DataBase.Transaction import TransactionWatchWallet
 from datetime import datetime
 from aiocron import crontab
 import asyncio
@@ -38,7 +38,14 @@ menu_buttons.add(register_button, my_wallets_button)
 async def back_to_registration(callback_query: types.CallbackQuery):
     try:
         await bot.answer_callback_query(callback_query.id)
-        text = '[Регистрация кошелька] - Добавьте свой адрес\n' \
+        session = Session()
+        user = session.query(User).filter_by(telegram_id=callback_query.from_user.id).first()
+        session.close()
+        text = f'Ваш аккаунт:\n' \
+               f'ID аккаунта: {user.telegram_id}\n' \
+               f'Дата создания: {user.reg_date}\n' \
+               f'\n' \
+               '[Регистрация кошелька] - Добавьте свой адрес (только уведомления)\n' \
                '[Мои кошельки] - Измените существующий или создайте новый'
         reply_markup = menu_buttons
         await bot.edit_message_text(chat_id=callback_query.from_user.id,

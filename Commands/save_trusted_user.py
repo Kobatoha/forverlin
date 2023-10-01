@@ -10,7 +10,7 @@ from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
 from DataBase.WatchWallet import WatchWallet
-from DataBase.TransactionWatchWallet import TransactionWatchWallet
+from DataBase.Transaction import TransactionWatchWallet
 from datetime import datetime
 from aiocron import crontab
 import asyncio
@@ -38,7 +38,7 @@ class ShareWallet(StatesGroup):
     waiting_for_trusted_username = State()
 
 
-# [SAVE TRUSTED USER] @dp.message_handler(state=ShareWallet.waiting_for_trusted_username)
+# [SAVE TRUSTED USER]
 async def save_trusted_user(message: types.Message, state: FSMContext):
     try:
         trusted_username = message.text
@@ -102,7 +102,6 @@ async def save_trusted_user(message: types.Message, state: FSMContext):
             await bot.send_message(chat_id=message.from_user.id,
                                    text=text,
                                    reply_markup=reply_markup)
-
 
         await state.finish()
 

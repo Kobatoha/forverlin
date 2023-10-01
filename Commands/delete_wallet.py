@@ -10,7 +10,7 @@ from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
 from DataBase.WatchWallet import WatchWallet
-from DataBase.TransactionWatchWallet import TransactionWatchWallet
+from DataBase.Transaction import Transaction
 from datetime import datetime
 from aiocron import crontab
 import asyncio
@@ -40,14 +40,14 @@ async def delete_wallet(callback_query: types.CallbackQuery):
         wallet_address = callback_query.data.split('_')[1]
 
         session = Session()
-        session.query(TransactionWatchWallet).filter_by(wallet_address=wallet_address).delete()
-        session.query(WatchWallet).filter_by(wallet_address=wallet_address).delete()
+        session.query(Transaction).filter_by(wallet_address=wallet_address).delete()
         session.query(TrustedUser).filter_by(wallet_address=wallet_address).delete()
         session.query(WalletTron).filter_by(wallet_address=wallet_address).delete()
         session.commit()
         session.close()
 
         text = 'Кошелек успешно удален!\n' \
+               '\n' \
                '[Регистрация кошелька] - Добавьте свой адрес\n' \
                '[Мои кошельки] - Измените существующий или создайте новый'
 
@@ -58,7 +58,7 @@ async def delete_wallet(callback_query: types.CallbackQuery):
                                     reply_markup=reply_markup)
 
     except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции delete_callback: {e}')
+        logging.error(f' [DELETE WALLET] {callback_query.from_user.id} - Ошибка в функции delete_wallet: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'{callback_query.from_user.id} - Произошла ошибка в функции delete_callback:'
-                                    f' {e}')
+                               text=f'[DELETE WALLET] {callback_query.from_user.id} - '
+                                    f'Произошла ошибка в функции delete_wallet: {e}')

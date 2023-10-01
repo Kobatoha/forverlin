@@ -10,7 +10,7 @@ from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
 from DataBase.WatchWallet import WatchWallet
-from DataBase.TransactionWatchWallet import TransactionWatchWallet
+from DataBase.Transaction import TransactionWatchWallet
 from datetime import datetime
 from aiocron import crontab
 import asyncio
@@ -29,12 +29,11 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
-# [CLICK TRUSTED USERS]
-async def click_trusted_users(callback_query: types.CallbackQuery):
+# [TRUSTED USERS]
+async def trusted_users(callback_query: types.CallbackQuery):
     try:
         wallet_address = callback_query.data.split('_')[2]
 
-        # получение списка доверенных пользователей для данного кошелька
         session = Session()
         trusted_users = session.query(TrustedUser).filter_by(wallet_address=wallet_address).all()
         session.close()

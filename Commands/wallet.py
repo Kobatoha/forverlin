@@ -10,7 +10,7 @@ from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
 from DataBase.WatchWallet import WatchWallet
-from DataBase.TransactionWatchWallet import TransactionWatchWallet
+from DataBase.Transaction import TransactionWatchWallet
 from datetime import datetime
 from aiocron import crontab
 import asyncio
@@ -59,9 +59,17 @@ async def wallets(message: types.Message):
                                                  callback_data='back_to_registration')
         create_wallet_button = types.InlineKeyboardButton(text='Создать кошелек',
                                                           callback_data='create_tron_wallet')
+        session = Session()
+        user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
+        session.close()
+        text = f'Добро пожаловать!\n' \
+               f'\n' \
+               f'Ваш аккаунт:\n' \
+               f'ID аккаунта: {user.telegram_id}\n' \
+               f'Дата создания: {user.reg_date}\n' \
+               f'\n' \
+               f'Ваши кошельки в системе Старого Грузина: '
 
-        # создание сообщения с кнопками
-        text = 'Ваши кошельки в системе Старого Грузина:'
         reply_markup = types.InlineKeyboardMarkup(row_width=1)
         reply_markup.add(*buttons, create_wallet_button, back_button)
 
@@ -105,8 +113,17 @@ async def my_wallets(callback_query: types.CallbackQuery):
         back_button = types.InlineKeyboardButton(text='Вернуться в предыдущее меню',
                                                  callback_data='back_to_registration')
 
-        # создание сообщения с кнопками
-        text = 'Ваши кошельки в системе Старого Грузина:'
+        session = Session()
+        user = session.query(User).filter_by(telegram_id=callback_query.from_user.id).first()
+        session.close()
+        text = f'Добро пожаловать!\n' \
+               f'\n' \
+               f'Ваш аккаунт:\n' \
+               f'ID аккаунта: {user.telegram_id}\n' \
+               f'Дата создания: {user.reg_date}\n' \
+               f'\n' \
+               f'Ваши кошельки в системе Старого Грузина: '
+
         reply_markup = types.InlineKeyboardMarkup(row_width=1)
         reply_markup.add(*buttons, create_wallet_button, back_button)
 

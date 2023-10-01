@@ -38,26 +38,10 @@ class WalletNameEdit(StatesGroup):
     waiting_for_new_name = State()
 
 
-# [SAVE WALLET NAME]
-@dp.message_handler(state=WalletNameEdit.waiting_for_new_name)
-async def save_wallet_name(message: types.Message, state: FSMContext):
+# [CANCEL EDIT WALLET NAME]
+async def cancel_edit_wallet_name(callback_query: types.CallbackQuery, state: FSMContext):
     try:
-        new_wallet_name = message.text
-        data = await state.get_data()
-        wallet_address = data.get('wallet_address')
-
-        session = Session()
-        watch_wallet = session.query(WatchWallet).filter_by(wallet_address=wallet_address).first()
-        if watch_wallet:
-            watch_wallet.wallet_name = new_wallet_name.strip()
-            session.commit()
-
-        else:
-            tron_wallet = session.query(WalletTron).filter_by(wallet_address=wallet_address).first()
-            tron_wallet.wallet_name = new_wallet_name.strip()
-            session.commit()
-        session.close()
-
+        wallet_address = callback_query.data.split('_')[4]
         buttons = [
             types.InlineKeyboardButton(text='Получить адрес', callback_data=f'get_address_{wallet_address}'),
             types.InlineKeyboardButton(text='Редактировать название', callback_data=f'edit_{wallet_address}'),
@@ -65,21 +49,26 @@ async def save_wallet_name(message: types.Message, state: FSMContext):
             types.InlineKeyboardButton(text='Поделиться', callback_data=f'share_{wallet_address}'),
             types.InlineKeyboardButton(text='Доверенные пользователи', callback_data=f'trusted_users_{wallet_address}')
         ]
-
-        back_button = types.InlineKeyboardButton(text='Вернуться в предыдущее меню',
-                                                 callback_data=f'wallet_{wallet_address}')
+        back_button = types.InlineKeyboardButton(text='Вернуться в предыдущее меню', callback_data='mywallets')
         reply_markup = types.InlineKeyboardMarkup(row_width=1)
         reply_markup.add(*buttons, back_button)
 
-        text = f'Выберите действие с кошельком "{new_wallet_name}" - "{wallet_address}":'
-        await bot.send_message(chat_id=message.from_user.id,
-                               text=text,
-                               reply_markup=reply_markup)
+        session = Session()
+        wallet_name = session.query(WalletTron.wallet_name).filter_by(wallet_address=wallet_address).scalar()
+        session.close()
+
+        if wallet_name:
+            text = f'Выберите действие с кошельком «{wallet_name}» - «{wallet_address}»:'
+            await bot.edit_message_text(chat_id=callback_query.message.chat.id,
+                                        message_id=callback_query.message.message_id,
+                                        text=text,
+                                        reply_markup=reply_markup)
 
         await state.finish()
 
     except Exception as e:
-        logging.error(f'{message.from_user.id} - Ошибка в функции save_wallet_name: {e}')
+        logging.error(f' [CANCEL EDIT WALLET NAME] {callback_query.from_user.id} - '
+                      f'Ошибка в функции cancel_edit_wallet_name: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'{message.from_user.id} - Произошла ошибка в функции save_wallet_name:'
-                                    f' {e}')
+                               text=f'[CANCEL EDIT WALLET NAME] {callback_query.from_user.id} - '
+                                    f'Произошла ошибка в функции cancel_edit_wallet_name: {e}')
