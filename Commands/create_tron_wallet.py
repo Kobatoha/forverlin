@@ -40,7 +40,7 @@ async def create_tron_wallet(callback_query: types.CallbackQuery):
         print("Create Wallet address:  %s" % new_wallet['base58check_address'])
         print("Create Private Key:  %s" % new_wallet['private_key'])
         wallet = WalletTron(telegram_id=callback_query.from_user.id, wallet_address=new_wallet['base58check_address'],
-                            only_watch=True, private_key=new_wallet['private_key'], upd_date=datetime.today())
+                            private_key=new_wallet['private_key'], upd_date=datetime.today())
 
         session.add(wallet)
         session.commit()

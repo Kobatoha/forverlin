@@ -12,7 +12,8 @@ from Commands.cancel_edit_wallet_name import cancel_edit_wallet_name, WalletName
 from Commands.get_wallet_address import get_wallet_address
 from Commands.save_wallet_name import save_wallet_name, WalletNameEdit
 from Commands.delete_wallet import delete_wallet
-from Commands.share_wallet import share_wallet, ShareWallet, cancel_to_share_wallet
+from Commands.share_wallet import share_wallet, ShareWallet
+from Commands.cancel_share_wallet import cancel_share_wallet, ShareWallet
 from Commands.save_trusted_user import save_trusted_user, ShareWallet
 from Commands.trusted_users import trusted_users
 from Commands.choice_remove_trusted_user import choice_remove_trusted_user

@@ -9,7 +9,6 @@ from DataBase.Base import Base
 from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
-from DataBase.WatchWallet import WatchWallet
 from DataBase.Transaction import Transaction
 from datetime import datetime
 from aiocron import crontab

@@ -3,7 +3,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import TOKEN, DB_URL
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, join, or_
 from sqlalchemy.orm import sessionmaker
 from DataBase.Base import Base
 from DataBase.User import User
@@ -28,11 +28,14 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
-# [CLICK WALLET]
-async def click_wallet(callback_query: types.CallbackQuery):
-    try:
-        wallet_address = callback_query.data.split('_')[1]
+class ShareWallet(StatesGroup):
+    waiting_for_trusted_username = State()
 
+
+# [CANCEL SHARE WALLET]
+async def cancel_share_wallet(callback_query: types.CallbackQuery, state: FSMContext):
+    try:
+        wallet_address = callback_query.data.split('_')[3]
         buttons = [
             types.InlineKeyboardButton(text='Получить адрес', callback_data=f'get_address_{wallet_address}'),
             types.InlineKeyboardButton(text='Редактировать название', callback_data=f'edit_{wallet_address}'),
@@ -45,18 +48,21 @@ async def click_wallet(callback_query: types.CallbackQuery):
         reply_markup.add(*buttons, back_button)
 
         session = Session()
-        wallet_name = session.query(WalletTron.wallet_name).filter_by(wallet_address=wallet_address).scalar()
+        wallet_tron_name = session.query(WalletTron.wallet_name).filter_by(wallet_address=wallet_address).scalar()
         session.close()
 
-        if wallet_name:
-            text = f'Выберите действие с кошельком «{wallet_name}» - «{wallet_address}»:'
+        if wallet_tron_name:
+            text = f'Выберите действие с кошельком «{wallet_tron_name}» - «{wallet_address}»:'
             await bot.edit_message_text(chat_id=callback_query.message.chat.id,
                                         message_id=callback_query.message.message_id,
                                         text=text,
                                         reply_markup=reply_markup)
 
+        await state.finish()
+
     except Exception as e:
-        logging.error(f' [CLICK WALLET] {callback_query.from_user.id} - Ошибка в функции click_wallet: {e}')
+        logging.error(f' [CANCEL SHARE WALLET] {callback_query.from_user.id} - '
+                      f'Ошибка в функции cancel_to_share_wallet: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'[CLICK WALLET] {callback_query.from_user.id} - '
-                                    f'Произошла ошибка в функции click_wallet: {e}')
+                               text=f'[CANCEL SHARE WALLET] {callback_query.from_user.id} - '
+                                    f'Произошла ошибка в функции cancel_to_share_wallet: {e}')

@@ -9,8 +9,7 @@ from DataBase.Base import Base
 from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
-from DataBase.WatchWallet import WatchWallet
-from DataBase.Transaction import TransactionWatchWallet
+from DataBase.Transaction import Transaction
 from datetime import datetime
 import asyncio
 import logging

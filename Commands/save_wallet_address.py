@@ -57,15 +57,18 @@ async def save_wallet_address(message: types.Message, state: FSMContext):
                                    text='Такой адрес уже зарегистрирован в системе. Попробуйте еще раз.')
             return
 
+        wallet = WalletTron(telegram_id=message.from_user.id,
+                            wallet_address=wallet_address,
+                            only_watch=True)
+        session.add(wallet)
+        session.commit()
+
         wallet_count = session.query(WalletTron).filter_by(telegram_id=message.from_user.id).count()
 
-        user = WalletTron(telegram_id=callback_query.from_user.id,
-                          wallet_address=wallet_address,
-                          username=callback_query.from_user.username,
-                          only_watch=True,
-                          wallet_name=f'wallet {wallet_count}')
-        session.add(user)
+        wallet.wallet_name = f'wallet {wallet_count}'
         session.commit()
+
+        session.close()
 
         await bot.send_message(chat_id=message.from_user.id,
                                text='Вы успешно добавили адрес. Вы можете добавить новый адрес или '
@@ -75,7 +78,7 @@ async def save_wallet_address(message: types.Message, state: FSMContext):
         await state.finish()
 
     except Exception as e:
-        logging.error(f'{message.from_user.id} - ошибка в функции save_wallet_id: {e}')
+        logging.error(f' [SAVE WALLET ADDRESS] {message.from_user.id} - ошибка в функции save_wallet_address: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'[SAVE WALLET ID] {message.from_user.id} - '
-                                    f'произошла ошибка в функции save_wallet_id: {e}')
+                               text=f'[SAVE WALLET ADDRESS] {message.from_user.id} - '
+                                    f'произошла ошибка в функции save_wallet_address: {e}')

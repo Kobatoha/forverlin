@@ -9,8 +9,7 @@ from DataBase.Base import Base
 from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
-from DataBase.WatchWallet import WatchWallet
-from DataBase.Transaction import TransactionWatchWallet
+from DataBase.Transaction import Transaction
 from datetime import datetime
 from aiocron import crontab
 import asyncio
@@ -29,27 +28,18 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
-# [WALLETS] reply_button
+# [WALLETS] reply button
 async def wallets(message: types.Message):
     try:
         user_id = message.from_user.id
 
         session = Session()
-        wallets = session.query(WatchWallet.wallet_address, WatchWallet.wallet_name).filter(
-            (WatchWallet.telegram_id == user_id) &
-            (WatchWallet.wallet_address != None)
-        ).all()
-        session.close()
 
-        buttons = []
-        for wallet, wallet_name in wallets:
-            button_text = f'{wallet_name} - {wallet[:3]}...{wallet[-3:]}'
-            buttons.append(types.InlineKeyboardButton(text=button_text, callback_data=f'wallet_{wallet}'))
-
-        session = Session()
         wallets_tron = session.query(WalletTron.wallet_address, WalletTron.wallet_name).filter(
             WalletTron.telegram_id == user_id).all()
         session.close()
+
+        buttons = []
 
         for wallet, wallet_name in wallets_tron:
             button_text = f'{wallet_name} - {wallet[:3]}...{wallet[-3:]}'
@@ -78,9 +68,10 @@ async def wallets(message: types.Message):
                                reply_markup=reply_markup)
 
     except Exception as e:
-        logging.error(f'{message.from_user.id} - Ошибка в функции wallets: {e}')
+        logging.error(f' [WALLETS] reply button {message.from_user.id} - Ошибка в функции wallets: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'[WALLETS] {message.from_user.id} - Произошла ошибка в функции wallets: {e}')
+                               text=f'[WALLETS] reply button {message.from_user.id} - '
+                                    f'Произошла ошибка в функции wallets: {e}')
 
 
 # [MY WALLETS] inline button
@@ -89,21 +80,11 @@ async def my_wallets(callback_query: types.CallbackQuery):
         user_id = callback_query.from_user.id
 
         session = Session()
-        wallets = session.query(WatchWallet.wallet_address, WatchWallet.wallet_name).filter(
-            (WatchWallet.telegram_id == user_id) &
-            (WatchWallet.wallet_address != None)
-        ).all()
-        session.close()
-
-        buttons = []
-        for wallet, wallet_name in wallets:
-            button_text = f'{wallet_name} - {wallet[:3]}...{wallet[-3:]}'
-            buttons.append(types.InlineKeyboardButton(text=button_text, callback_data=f'wallet_{wallet}'))
-
-        session = Session()
         wallets_tron = session.query(WalletTron.wallet_address, WalletTron.wallet_name).filter(
             WalletTron.telegram_id == user_id).all()
         session.close()
+
+        buttons = []
 
         for wallet, wallet_name in wallets_tron:
             button_text = f'{wallet_name} - {wallet[:3]}...{wallet[-3:]}'
@@ -132,7 +113,7 @@ async def my_wallets(callback_query: types.CallbackQuery):
                                     text=text,
                                     reply_markup=reply_markup)
     except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции my_wallets: {e}')
+        logging.error(f' [MY WALLETS] inline button {callback_query.from_user.id} - Ошибка в функции my_wallets: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'[MY WALLETS] {callback_query.from_user.id} - '
+                               text=f'[MY WALLETS] inline button {callback_query.from_user.id} - '
                                     f'Произошла ошибка в функции my_wallets: {e}')

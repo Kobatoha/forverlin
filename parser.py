@@ -14,7 +14,7 @@ from DataBase.Base import Base
 from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
-from DataBase.WatchWallet import WatchWallet
+from DataBase.Transaction import Transaction
 from datetime import datetime
 
 
@@ -31,7 +31,8 @@ async def get_data(url):
         'Accept-Encoding': 'gzip, deflate, br',
         'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
         'Connection': 'keep-alive',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/114.0.0.0 Safari/537.36'
     }
 
     async with aiohttp.ClientSession(headers=headers) as session:
@@ -39,9 +40,11 @@ async def get_data(url):
         users = session_db.query(User).all()
         for user in users:
             if user.wallet is not None:
-                wallet = user.wallet
+                wallet_address = user.wallet
 
-                async with session.get(f"https://apilist.tronscanapi.com/api/token_trc20/transfers?limit=3&start=0&sort=-timestamp&count=true&filterTokenValue=0&relatedAddress={wallet}") as response:
+                async with session.get(
+                        f"https://apilist.tronscanapi.com/api/token_trc20/transfers?limit=3&start=0&sort="
+                        f"-timestamp&count=true&filterTokenValue=0&relatedAddress={wallet_address}") as response:
                     if response.status == 200:
 
                         parsed_data = await response.json()
@@ -60,10 +63,11 @@ async def get_data(url):
                                 'tokenAbbr': transfer['tokenInfo']['tokenAbbr']
                             }
 
-                            if not sub_session.query(Transactions).filter_by(transaction_id=dict_['transaction_id']).first():
+                            if not sub_session.query(Transactions).filter_by(
+                                    transaction_id=dict_['transaction_id']).first():
                                 print(now, 'Добавляется новая транзакция в', user.wallet_name)
                                 trans = Transactions(
-                                    wallet=wallet,
+                                    wallet_address=wallet_address,
                                     transaction_id=dict_['transaction_id'],
                                     token_abbr=dict_['tokenAbbr'],
                                     count=dict_['quant'],
@@ -80,7 +84,7 @@ async def get_data(url):
                         await asyncio.sleep(120)
                         return {}
 
-                    await asyncio.sleep(5) # добавляем задержку между запросами
+                    await asyncio.sleep(5)  # добавляем задержку между запросами
 
         session_db.close()
 
@@ -88,10 +92,10 @@ async def get_data(url):
 async def parser_main():
     tasks = []
     session = Session()
-    users = session.query(User).all()
-    for user in users:
-        wallet = user.wallet
-        task = asyncio.create_task(get_data(f"https://tronscan.org/#/address/{wallet}/transfers"))
+    wallets = session.query(WalletTron).all()
+    for wallet in wallets:
+        wallet_address = wallet.wallet_address
+        task = asyncio.create_task(get_data(f"https://tronscan.org/#/address/{wallet_address}/transfers"))
         tasks.append(task)
     await asyncio.gather(*tasks)
     session.close()

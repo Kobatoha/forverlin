@@ -1,6 +1,4 @@
-from aiogram import Bot, Dispatcher, executor, types, filters
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.dispatcher import FSMContext
+from aiogram import Bot, Dispatcher, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import TOKEN, DB_URL
 from parser import parser_main
@@ -9,14 +7,10 @@ from sqlalchemy.orm import sessionmaker
 from DataBase.Base import Base
 from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
-from DataBase.WalletTron import WalletTron
-from DataBase.WatchWallet import WatchWallet
-from DataBase.Transaction import TransactionWatchWallet
 from datetime import datetime
 from aiocron import crontab
-import asyncio
 import logging
-from Commands.command_imports import *
+from command_imports import *
 
 logging.basicConfig(filename='bot.log', level=logging.INFO)
 
@@ -58,8 +52,8 @@ dp.register_message_handler(save_wallet_name, state=WalletNameEdit.waiting_for_n
 dp.register_callback_query_handler(delete_wallet, lambda c: c.data.startswith('delete_'))       # [DELETE WALLET]
 dp.register_callback_query_handler(share_wallet, lambda c: c.data.startswith('share_'))         # [SHARE WALLET]
 dp.register_callback_query_handler(
-    cancel_to_share_wallet,
-    lambda c: c.data.startswith('cancel_to_share_wallet_'),
+    cancel_share_wallet,
+    lambda c: c.data.startswith('cancel_share_wallet_'),
     state=ShareWallet.waiting_for_trusted_username)                                             # [CANCEL SHARE WALLET]
 dp.register_message_handler(save_trusted_user, state=ShareWallet.waiting_for_trusted_username)  # [SAVE TRUSTED USER]
 dp.register_callback_query_handler(trusted_users,
