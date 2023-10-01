@@ -9,7 +9,6 @@ from DataBase.Base import Base
 from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
-from DataBase.Transaction import Transaction
 from datetime import datetime
 from aiocron import crontab
 import asyncio
@@ -34,14 +33,20 @@ async def trusted_users(callback_query: types.CallbackQuery):
         wallet_address = callback_query.data.split('_')[2]
 
         session = Session()
-        trusted_users = session.query(TrustedUser).filter_by(wallet_address=wallet_address).all()
+
+        users = session.query(TrustedUser).filter_by(wallet_address=wallet_address).all()
         session.close()
 
-        if not trusted_users:
-            text = 'Нет доверенных пользователей для этого кошелька'
+        if not users:
+            text = 'Доверенные пользователи получают только уведомления о входящих транзакциях по данному адресу,' \
+                   ' иные взаимодействия с кошельком для этих пользователей невозможны.\n' \
+                   '\n' \
+                   'Для этого адреса нет доверенных пользователей'
         else:
-            text = 'Доверенные пользователи для этого кошелька:\n'
-            for user in trusted_users:
+            text = 'Доверенные пользователи получают только уведомления о входящих транзакциях по данному адресу,' \
+                   'иные взаимодействия с кошельком невозможны.\n' \
+                   'Доверенные пользователи для этого кошелька:\n'
+            for user in users:
                 text += f'- {user.username}\n'
 
         buttons = [
@@ -60,7 +65,7 @@ async def trusted_users(callback_query: types.CallbackQuery):
                                     reply_markup=reply_markup)
 
     except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции click_trusted_users: {e}')
+        logging.error(f' [TRUSTED USERS] {callback_query.from_user.id} - Ошибка в функции click_trusted_users: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'{callback_query.from_user.id} - Произошла ошибка в функции '
+                               text=f'[TRUSTED USERS] {callback_query.from_user.id} - Произошла ошибка в функции '
                                     f'click_trusted_users: {e}')

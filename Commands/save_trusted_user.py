@@ -64,7 +64,6 @@ async def save_trusted_user(message: types.Message, state: FSMContext):
         session.close()
 
         session = Session()
-        wallet_name = session.query(WatchWallet.wallet_name).filter_by(wallet_address=wallet_address).scalar()
         wallet_tron_name = session.query(WalletTron.wallet_name).filter_by(wallet_address=wallet_address).scalar()
         session.close()
 
@@ -77,21 +76,9 @@ async def save_trusted_user(message: types.Message, state: FSMContext):
         reply_markup = types.InlineKeyboardMarkup(row_width=1)
         reply_markup.add(*buttons)
 
-        if wallet_name:
+        if wallet_tron_name:
             text = f'Пользователь «{trusted_username}» добавлен для слежения за транзакциями в кошельке ' \
-                   f'«{wallet_name}» - {wallet_address[:3]}...{wallet_address[-3:]}.\n' \
-                   f'Чтобы пользователь «{trusted_username}» получал уведомления о новых транзакциях, ' \
-                   f'отправьте ему ссылку на бота, чтобы он авторизовался нажатием на кнопку start'
-
-            await bot.send_message(chat_id=message.from_user.id,
-                                   text=text,
-                                   reply_markup=reply_markup)
-            await bot.send_message(chat_id=message.from_user.id,
-                                   text='https://t.me/NonameKobatohaBot')
-
-        elif wallet_tron_name:
-            text = f'Пользователь «{trusted_username}» добавлен для слежения за транзакциями в кошельке ' \
-                   f'«{wallet_tron_name}» - {wallet_address[:3]}...{wallet_address[-3:]}.\n' \
+                   f'«{wallet_tron_name}» - «{wallet_address[:3]}...{wallet_address[-3:]}».\n' \
                    f'Чтобы пользователь «{trusted_username}» получал уведомления о новых транзакциях, ' \
                    f'отправьте ему ссылку на бота, чтобы он авторизовался нажатием на кнопку start'
 
@@ -105,7 +92,7 @@ async def save_trusted_user(message: types.Message, state: FSMContext):
         await state.finish()
 
     except Exception as e:
-        logging.error(f'{message.from_user.id} - Ошибка в функции save_trusted_user: {e}')
+        logging.error(f' [SAVE TRUSTED USER] {message.from_user.id} - Ошибка в функции save_trusted_user: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'{message.from_user.id} - Произошла ошибка в функции '
+                               text=f'[SAVE TRUSTED USER] {message.from_user.id} - Произошла ошибка в функции '
                                     f'save_trusted_user: {e}')

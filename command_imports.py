@@ -18,3 +18,4 @@ from Commands.save_trusted_user import save_trusted_user, ShareWallet
 from Commands.trusted_users import trusted_users
 from Commands.choice_remove_trusted_user import choice_remove_trusted_user
 from Commands.remove_trusted_user import remove_user
+from Commands.confirm_create_tron_wallet import confirm_create_tron_wallet

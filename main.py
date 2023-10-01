@@ -36,6 +36,8 @@ dp.register_message_handler(save_wallet_address,
                             state=WalletRegistration.waiting_for_wallet_id)                     # [SAVE WALLET ADDRESS]
 dp.register_message_handler(wallets, text_contains='Кошелек')                                   # [WALLETS] reply
 dp.register_callback_query_handler(my_wallets, text_contains='mywallets')                       # [MY WALLETS] inline
+dp.register_callback_query_handler(confirm_create_tron_wallet,
+                                   text_contains='confirm_create_tron_wallet')            # [CONFIRM CREATE TRON WALLET]
 dp.register_callback_query_handler(create_tron_wallet, text_contains='create_tron_wallet')      # [CREATE TRON WALLET]
 dp.register_callback_query_handler(
     back_to_registration,

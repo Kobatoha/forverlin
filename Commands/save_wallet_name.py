@@ -27,18 +27,12 @@ Base.metadata.create_all(engine)
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-menu_buttons = types.InlineKeyboardMarkup(row_width=2)
-register_button = types.InlineKeyboardButton(text='Регистрация кошелька', callback_data='register')
-my_wallets_button = types.InlineKeyboardButton(text='Мои кошельки', callback_data='mywallets')
-menu_buttons.add(register_button, my_wallets_button)
-
 
 class WalletNameEdit(StatesGroup):
     waiting_for_new_name = State()
 
 
 # [SAVE WALLET NAME]
-@dp.message_handler(state=WalletNameEdit.waiting_for_new_name)
 async def save_wallet_name(message: types.Message, state: FSMContext):
     try:
         new_wallet_name = message.text
@@ -46,15 +40,11 @@ async def save_wallet_name(message: types.Message, state: FSMContext):
         wallet_address = data.get('wallet_address')
 
         session = Session()
-        watch_wallet = session.query(WatchWallet).filter_by(wallet_address=wallet_address).first()
-        if watch_wallet:
-            watch_wallet.wallet_name = new_wallet_name.strip()
-            session.commit()
 
-        else:
-            tron_wallet = session.query(WalletTron).filter_by(wallet_address=wallet_address).first()
-            tron_wallet.wallet_name = new_wallet_name.strip()
-            session.commit()
+        tron_wallet = session.query(WalletTron).filter_by(wallet_address=wallet_address).first()
+        tron_wallet.wallet_name = new_wallet_name.strip()
+        session.commit()
+
         session.close()
 
         buttons = [
@@ -70,7 +60,7 @@ async def save_wallet_name(message: types.Message, state: FSMContext):
         reply_markup = types.InlineKeyboardMarkup(row_width=1)
         reply_markup.add(*buttons, back_button)
 
-        text = f'Выберите действие с кошельком "{new_wallet_name}" - "{wallet_address}":'
+        text = f'Выберите действие с кошельком «{new_wallet_name}» - «{wallet_address}»:'
         await bot.send_message(chat_id=message.from_user.id,
                                text=text,
                                reply_markup=reply_markup)
@@ -78,7 +68,7 @@ async def save_wallet_name(message: types.Message, state: FSMContext):
         await state.finish()
 
     except Exception as e:
-        logging.error(f'{message.from_user.id} - Ошибка в функции save_wallet_name: {e}')
+        logging.error(f' [SAVE WALLET NAME] {message.from_user.id} - Ошибка в функции save_wallet_name: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'{message.from_user.id} - Произошла ошибка в функции save_wallet_name:'
-                                    f' {e}')
+                               text=f'[SAVE WALLET NAME] {message.from_user.id} - '
+                                    f'Произошла ошибка в функции save_wallet_name: {e}')

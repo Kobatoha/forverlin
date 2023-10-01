@@ -4,7 +4,6 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import TOKEN, DB_URL
-from parser import parser_main
 import json
 import datetime
 from sqlalchemy import create_engine
@@ -55,7 +54,7 @@ async def create_tron_wallet(callback_query: types.CallbackQuery):
         back_button = types.InlineKeyboardButton(text='Вернуться в предыдущее меню', callback_data='mywallets')
         reply_markup = types.InlineKeyboardMarkup().add(back_button)
 
-        text = f'Кошелек успешно создан!' \
+        text = f'Кошелек успешно создан!\n' \
                f'\n' \
                f'Адрес для TRX кошелька:\n' \
                f'Для: Tron\n' \

@@ -28,7 +28,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
-# [DELETE TRUSTED USER] @dp.callback_query_handler(lambda c: c.data.startswith('remove_'))
+# [DELETE TRUSTED USER]
 async def remove_user(callback_query: types.CallbackQuery):
     try:
         data = callback_query.data.split('_')
@@ -61,7 +61,7 @@ async def remove_user(callback_query: types.CallbackQuery):
         await bot.answer_callback_query(callback_query_id=callback_query.id)
 
     except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции remove_user: {e}')
+        logging.error(f' [DELETE TRUSTED USER] {callback_query.from_user.id} - Ошибка в функции remove_user: {e}')
         await bot.send_message(chat_id='952604184',
-                               text=f'{callback_query.from_user.id} - Произошла ошибка в функции '
+                               text=f'[DELETE TRUSTED USER] {callback_query.from_user.id} - Произошла ошибка в функции '
                                     f'remove_user: {e}')

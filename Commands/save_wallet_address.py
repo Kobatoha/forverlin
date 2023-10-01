@@ -35,9 +35,6 @@ register_button = types.InlineKeyboardButton(text='Регистрация кош
 my_wallets_button = types.InlineKeyboardButton(text='Мои кошельки', callback_data='mywallets')
 menu_buttons.add(register_button, my_wallets_button)
 
-menu_register = types.InlineKeyboardMarkup()
-menu_register.add(register_button)
-
 
 # [SAVE WALLET ADDRESS]
 async def save_wallet_address(message: types.Message, state: FSMContext):

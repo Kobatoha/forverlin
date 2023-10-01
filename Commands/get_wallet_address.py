@@ -27,11 +27,6 @@ Base.metadata.create_all(engine)
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-menu_buttons = types.InlineKeyboardMarkup(row_width=2)
-register_button = types.InlineKeyboardButton(text='Регистрация кошелька', callback_data='register')
-my_wallets_button = types.InlineKeyboardButton(text='Мои кошельки', callback_data='mywallets')
-menu_buttons.add(register_button, my_wallets_button)
-
 
 # [GET WALLET ADDRESS]
 async def get_wallet_address(callback_query: types.CallbackQuery):

@@ -53,7 +53,8 @@ async def back_to_registration(callback_query: types.CallbackQuery):
                                     reply_markup=reply_markup)
 
     except Exception as e:
-        logging.error(f'{callback_query.from_user.id} - Ошибка в функции back_to_registration: {e}')
+        logging.error(f' [BACK TO REGISTRATION] {callback_query.from_user.id} - '
+                      f'Ошибка в функции back_to_registration: {e}')
         await bot.send_message(chat_id='952604184',
                                text=f'[BACK TO REGISTRATION] {callback_query.from_user.id} - '
                                     f'Произошла ошибка в функции back_to_registration: {e}')

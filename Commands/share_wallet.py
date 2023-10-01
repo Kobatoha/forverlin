@@ -27,11 +27,6 @@ Base.metadata.create_all(engine)
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-menu_buttons = types.InlineKeyboardMarkup(row_width=2)
-register_button = types.InlineKeyboardButton(text='Регистрация кошелька', callback_data='register')
-my_wallets_button = types.InlineKeyboardButton(text='Мои кошельки', callback_data='mywallets')
-menu_buttons.add(register_button, my_wallets_button)
-
 
 class ShareWallet(StatesGroup):
     waiting_for_trusted_username = State()
@@ -43,7 +38,7 @@ async def share_wallet(callback_query: types.CallbackQuery, state: FSMContext):
         wallet_address = callback_query.data.split('_')[1]
 
         session = Session()
-        wallet_name = session.query(WatchWallet.wallet_name).filter_by(wallet_address=wallet_address).scalar()
+
         wallet_tron_name = session.query(WalletTron.wallet_name).filter_by(wallet_address=wallet_address).scalar()
         session.close()
 
@@ -52,16 +47,12 @@ async def share_wallet(callback_query: types.CallbackQuery, state: FSMContext):
         reply_markup = types.InlineKeyboardMarkup()
         reply_markup.add(back_button)
 
-        if wallet_name:
-            text = f'Введите пользователя (@username), который будет получать уведомления с ' \
-                   f'кошелька: «{wallet_name}» - {wallet_address[:3]}...{wallet_address[-3:]}:'
-            await bot.edit_message_text(chat_id=callback_query.message.chat.id,
-                                        message_id=callback_query.message.message_id,
-                                        text=text,
-                                        reply_markup=reply_markup)
-        elif wallet_tron_name:
-            text = f'Введите пользователя (@username), который будет получать уведомления с ' \
-                   f'кошелька: «{wallet_tron_name}» - {wallet_address[:3]}...{wallet_address[-3:]}:'
+        if wallet_tron_name:
+            text = 'Доверенные пользователи получают только уведомления о входящих транзакциях по данному адресу,' \
+                   ' иные взаимодействия с кошельком для этих пользователей невозможны.\n' \
+                   '\n' \
+                   f'Введите пользователя (@username), который будет получать уведомления с ' \
+                   f'кошелька: «{wallet_tron_name}» - «{wallet_address[:3]}...{wallet_address[-3:]}»:'
             await bot.edit_message_text(chat_id=callback_query.message.chat.id,
                                         message_id=callback_query.message.message_id,
                                         text=text,

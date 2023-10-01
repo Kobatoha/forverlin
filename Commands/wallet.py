@@ -42,13 +42,13 @@ async def wallets(message: types.Message):
         buttons = []
 
         for wallet, wallet_name in wallets_tron:
-            button_text = f'{wallet_name} - {wallet[:3]}...{wallet[-3:]}'
+            button_text = f'«{wallet_name}» - {wallet[:3]}...{wallet[-3:]}'
             buttons.append(types.InlineKeyboardButton(text=button_text, callback_data=f'wallet_{wallet}'))
 
         back_button = types.InlineKeyboardButton(text='Вернуться в предыдущее меню',
                                                  callback_data='back_to_registration')
         create_wallet_button = types.InlineKeyboardButton(text='Создать кошелек',
-                                                          callback_data='create_tron_wallet')
+                                                          callback_data='confirm_create_tron_wallet')
         session = Session()
         user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
         session.close()
@@ -87,7 +87,7 @@ async def my_wallets(callback_query: types.CallbackQuery):
         buttons = []
 
         for wallet, wallet_name in wallets_tron:
-            button_text = f'{wallet_name} - {wallet[:3]}...{wallet[-3:]}'
+            button_text = f'«{wallet_name}» - {wallet[:3]}...{wallet[-3:]}'
             buttons.append(types.InlineKeyboardButton(text=button_text, callback_data=f'wallet_{wallet}'))
 
         create_wallet_button = types.InlineKeyboardButton(text='Создать кошелек', callback_data='create_tron_wallet')
