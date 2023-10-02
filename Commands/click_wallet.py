@@ -36,7 +36,7 @@ async def click_wallet(callback_query: types.CallbackQuery):
         buttons = [
             types.InlineKeyboardButton(text='Получить адрес', callback_data=f'get_address_{wallet_address}'),
             types.InlineKeyboardButton(text='Редактировать название', callback_data=f'edit_{wallet_address}'),
-            types.InlineKeyboardButton(text='Удалить', callback_data=f'delete_{wallet_address}'),
+            types.InlineKeyboardButton(text='Удалить', callback_data=f'confirm_delete_{wallet_address}'),
             types.InlineKeyboardButton(text='Поделиться', callback_data=f'share_{wallet_address}'),
             types.InlineKeyboardButton(text='Доверенные пользователи', callback_data=f'trusted_users_{wallet_address}')
         ]

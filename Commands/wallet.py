@@ -90,7 +90,8 @@ async def my_wallets(callback_query: types.CallbackQuery):
             button_text = f'«{wallet_name}» - {wallet[:3]}...{wallet[-3:]}'
             buttons.append(types.InlineKeyboardButton(text=button_text, callback_data=f'wallet_{wallet}'))
 
-        create_wallet_button = types.InlineKeyboardButton(text='Создать кошелек', callback_data='create_tron_wallet')
+        create_wallet_button = types.InlineKeyboardButton(text='Создать кошелек',
+                                                          callback_data='confirm_create_tron_wallet')
         back_button = types.InlineKeyboardButton(text='Вернуться в предыдущее меню',
                                                  callback_data='back_to_registration')
 

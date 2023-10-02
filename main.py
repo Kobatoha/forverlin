@@ -52,6 +52,8 @@ dp.register_callback_query_handler(get_wallet_address,
                                    lambda c: c.data.startswith('get_address_'))                 # [GET WALLET ADDRESS]
 dp.register_message_handler(save_wallet_name, state=WalletNameEdit.waiting_for_new_name)        # [SAVE WALLET NAME]
 dp.register_callback_query_handler(delete_wallet, lambda c: c.data.startswith('delete_'))       # [DELETE WALLET]
+dp.register_callback_query_handler(confirm_delete_wallet,
+                                   text_contains='confirm_delete_')                            # [CONFIRM DELETE WALLET]
 dp.register_callback_query_handler(share_wallet, lambda c: c.data.startswith('share_'))         # [SHARE WALLET]
 dp.register_callback_query_handler(
     cancel_share_wallet,
