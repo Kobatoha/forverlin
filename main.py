@@ -7,10 +7,13 @@ from sqlalchemy.orm import sessionmaker
 from DataBase.Base import Base
 from DataBase.User import User
 from DataBase.TrustedUser import TrustedUser
+from DataBase.WalletTron import WalletTron
+from DataBase.Transaction import Transaction
 from datetime import datetime
 from aiocron import crontab
 import logging
 from command_imports import *
+import asyncio
 
 logging.basicConfig(filename='bot.log', level=logging.INFO)
 
@@ -68,19 +71,17 @@ dp.register_callback_query_handler(remove_user,
                                    lambda c: c.data.startswith('remove_'))                      # [DELETE TRUSTED USER]
 
 
-# SEND TRANSACTION
+# [SEND TRANSACTION]
 async def send_transaction_info():
     try:
         session = Session()
 
-        users = session.query(WatchWallet).all()
+        users = session.query(WalletTron).all()
         for user in users:
-            transactions = session.query(TransactionWatchWallet).filter(
-                TransactionWatchWallet.wallet_address == user.wallet_address,
-                TransactionWatchWallet.to_address == user.wallet_address,
-                TransactionWatchWallet.token_abbr == 'USDT',
-                TransactionWatchWallet.send_message == False
-            ).all()
+            transactions = session.query(Transaction).filter(Transaction.wallet_address == user.wallet_address,
+                                                             Transaction.to_address == user.wallet_address,
+                                                             Transaction.token_abbr == 'USDT',
+                                                             Transaction.send_message == False).all()
 
             for transaction in transactions:
                 count = transaction.count
@@ -109,9 +110,9 @@ async def send_transaction_info():
                     message_text = f"{user.wallet_name}: +{count} USDT"
 
                 if message_text:
-                    trusted_users = session.query(TrustedUser).filter_by(wallet_address=user.wallet_address).all()
+                    trust_users = session.query(TrustedUser).filter_by(wallet_address=user.wallet_address).all()
 
-                    for trusted_user in trusted_users:
+                    for trusted_user in trust_users:
                         in_all_user = session.query(User).filter_by(username=trusted_user.username[1:]).first()
                         if in_all_user and in_all_user.username == trusted_user.username[1:]:
                             print(f"trusted_user - {trusted_user.username} have a message from "
@@ -120,16 +121,16 @@ async def send_transaction_info():
                             await bot.send_message(chat_id=chat_id, text=message_text)
 
                     await bot.send_message(chat_id=user.telegram_id, text=message_text)
-                    logging.info(f'[SEND TRANSACTION] Пользователь {user.telegram_id} - {user.username} '
+                    logging.info(f'[SEND TRANSACTION] Пользователь {user.telegram_id} - '
                                  f'получил сообщение о транзакции: {message_text}')
                     transaction.send_message = True
                     session.commit()
         session.close()
 
-    except Exception as e:
-        logging.error(f'Ошибка в функции send_transaction_info: {e}')
+    except Exception as error:
+        logging.error(f'Ошибка в функции send_transaction_info: {error}')
         await bot.send_message(chat_id='952604184',
-                               text=f'Произошла ошибка в функции send_transaction_info: {e}')
+                               text=f'Произошла ошибка в функции send_transaction_info: {error}')
 
 
 async def crontab_parser():
@@ -142,20 +143,19 @@ async def crontab_parser():
 
 
 async def send_error():
-    now = datetime.now().strftime('%H:%M:%S')
+    now_error = datetime.now().strftime('%H:%M:%S')
     await bot.send_message(chat_id='952604184',
-                           text=f'{now}: Произошла ошибка в работе телеграм бота: {e}')
+                           text=f'{now_error}: Произошла ошибка в работе телеграм бота: {e}')
 
 
 if __name__ == '__main__':
     try:
-        now = datetime.now().strftime('%H:%M:%S')
-        #loop = asyncio.get_event_loop()
-        #loop.create_task(crontab_parser())
-        print(f'{now}: start "Стратый грузин" bot')
+        now_start = datetime.now().strftime('%H:%M:%S')
+        loop = asyncio.get_event_loop()
+        loop.create_task(crontab_parser())
+        print(f'{now_start}: start "Стратый грузин" bot')
         executor.start_polling(dp, skip_updates=True)
 
     except Exception as e:
         now = datetime.now().strftime('%H:%M:%S')
-        logging.error(f'{now}: Ошибка в работе телеграм бота: {e}')
-        send_error()
+        print(f'{now}: Произошла ошибка в работе телеграм бота, {e}')

@@ -37,10 +37,10 @@ async def get_data(url):
 
     async with aiohttp.ClientSession(headers=headers) as session:
         session_db = Session()
-        users = session_db.query(User).all()
+        users = session_db.query(WalletTron).all()
         for user in users:
-            if user.wallet is not None:
-                wallet_address = user.wallet
+            if user.wallet_address is not None:
+                wallet_address = user.wallet_address
 
                 async with session.get(
                         f"https://apilist.tronscanapi.com/api/token_trc20/transfers?limit=3&start=0&sort="
@@ -63,10 +63,10 @@ async def get_data(url):
                                 'tokenAbbr': transfer['tokenInfo']['tokenAbbr']
                             }
 
-                            if not sub_session.query(Transactions).filter_by(
+                            if not sub_session.query(Transaction).filter_by(
                                     transaction_id=dict_['transaction_id']).first():
                                 print(now, 'Добавляется новая транзакция в', user.wallet_name)
-                                trans = Transactions(
+                                trans = Transaction(
                                     wallet_address=wallet_address,
                                     transaction_id=dict_['transaction_id'],
                                     token_abbr=dict_['tokenAbbr'],
