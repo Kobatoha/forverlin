@@ -1,8 +1,8 @@
 # telegram bot token
-TOKEN = '6363183597:AAEBO3qZEwDgZzADTfmxXRlkhOGXIcKYOXc'
+TOKEN = '6551664026:AAHGN1_4zfC4Hd5HF_IeAL3Fgy2egVyACkM'
 
 # PostgreSQL db information
-host = 'localhost'
+host = '31.129.102.171'
 user = 'kobatoha'
 password = 'sirok123'
 db_name = 'forverlin_new'
