@@ -38,6 +38,7 @@ async def get_data(url):
     async with aiohttp.ClientSession(headers=headers) as session:
         session_db = Session()
         users = session_db.query(WalletTron).all()
+        session_db.close()
         for user in users:
             if user.wallet_address is not None:
                 wallet_address = user.wallet_address
@@ -65,7 +66,7 @@ async def get_data(url):
 
                             if not sub_session.query(Transaction).filter_by(
                                     transaction_id=dict_['transaction_id']).first():
-                                print(now, 'Добавляется новая транзакция в', user.wallet_name)
+
                                 trans = Transaction(
                                     wallet_address=wallet_address,
                                     transaction_id=dict_['transaction_id'],
@@ -76,9 +77,13 @@ async def get_data(url):
                                     date=day,
                                     time=now,
                                 )
+
                                 sub_session.add(trans)
+                                print(trans.wallet_address, trans.transaction_id, trans.token_abbr, trans.count,
+                                      trans.from_address, trans.to_address, trans.date, trans.time)
                                 sub_session.commit()
-                        sub_session.close()
+                                print(now, 'Добавляется новая транзакция в', user.wallet_name)
+                            sub_session.close()
                     else:
                         print(f"Ошибка при получении данных. Статус: {response.status}")
                         await asyncio.sleep(120)

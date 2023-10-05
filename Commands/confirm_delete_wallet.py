@@ -39,9 +39,10 @@ async def confirm_delete_wallet(callback_query: types.CallbackQuery):
 
         text = f'Вы подтверждаете удаление адреса?'
 
-        await bot.send_message(chat_id=callback_query.from_user.id,
-                               text=text,
-                               reply_markup=reply_markup)
+        await bot.edit_message_text(chat_id=callback_query.from_user.id,
+                                    message_id=callback_query.message.message_id,
+                                    text=text,
+                                    reply_markup=reply_markup)
 
     except Exception as e:
         logging.error(f' [CONFIRM DELETE WALLET] {callback_query.from_user.id} - '
