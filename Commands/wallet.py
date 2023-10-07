@@ -14,6 +14,7 @@ from datetime import datetime
 from aiocron import crontab
 import asyncio
 import logging
+from balance import get_balance_trx
 
 
 logging.basicConfig(filename='bot.log', level=logging.INFO)
@@ -42,6 +43,9 @@ async def wallets(message: types.Message):
         buttons = []
 
         for wallet, wallet_name in wallets_tron:
+            balance_ = await get_balance_trx(wallet)  # получаем баланс USDT для каждого кошелька
+            print(balance_)
+
             button_text = f'«{wallet_name}» - {wallet[:3]}...{wallet[-3:]}'
             buttons.append(types.InlineKeyboardButton(text=button_text, callback_data=f'wallet_{wallet}'))
 
@@ -57,6 +61,8 @@ async def wallets(message: types.Message):
                f'Ваш аккаунт:\n' \
                f'ID аккаунта: {user.telegram_id}\n' \
                f'Дата создания: {user.reg_date}\n' \
+               f'\n' \
+               f'Ваш баланс: {balance_} TRX\n' \
                f'\n' \
                f'Ваши кошельки в системе Старого Грузина: '
 
