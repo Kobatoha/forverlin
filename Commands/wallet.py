@@ -14,7 +14,7 @@ from datetime import datetime
 from aiocron import crontab
 import asyncio
 import logging
-from balance import get_balance_trx
+from balance import get_balance_trx, get_balance_usdt
 
 
 logging.basicConfig(filename='bot.log', level=logging.INFO)
@@ -41,10 +41,14 @@ async def wallets(message: types.Message):
         session.close()
 
         buttons = []
+        summ_balance_usdt = 0
 
         for wallet, wallet_name in wallets_tron:
-            balance_ = await get_balance_trx(wallet)  # получаем баланс USDT для каждого кошелька
-            print(balance_)
+            balance_ = await get_balance_usdt(wallet)
+            if balance_:
+                summ_balance_usdt += int(balance_)
+            else:
+                summ_balance_usdt += 0
 
             button_text = f'«{wallet_name}» - {wallet[:3]}...{wallet[-3:]}'
             buttons.append(types.InlineKeyboardButton(text=button_text, callback_data=f'wallet_{wallet}'))
@@ -53,6 +57,12 @@ async def wallets(message: types.Message):
                                                  callback_data='back_to_registration')
         create_wallet_button = types.InlineKeyboardButton(text='Создать кошелек',
                                                           callback_data='confirm_create_tron_wallet')
+        if summ_balance_usdt > 0:
+            balance_str = str(summ_balance_usdt)[:-6]
+            balance_formated = float(balance_str)
+        else:
+            balance_formated = 0
+
         session = Session()
         user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
         session.close()
@@ -62,7 +72,7 @@ async def wallets(message: types.Message):
                f'ID аккаунта: {user.telegram_id}\n' \
                f'Дата создания: {user.reg_date}\n' \
                f'\n' \
-               f'Ваш баланс: {balance_} TRX\n' \
+               f'Ваш баланс: {balance_formated:,.2f} USDT\n' \
                f'\n' \
                f'Ваши кошельки в системе Старого Грузина: '
 
@@ -91,15 +101,27 @@ async def my_wallets(callback_query: types.CallbackQuery):
         session.close()
 
         buttons = []
+        summ_balance_usdt = 0
 
         for wallet, wallet_name in wallets_tron:
+            balance_ = await get_balance_usdt(wallet)
+            if balance_:
+                summ_balance_usdt += int(balance_)
+            else:
+                summ_balance_usdt += 0
+
             button_text = f'«{wallet_name}» - {wallet[:3]}...{wallet[-3:]}'
             buttons.append(types.InlineKeyboardButton(text=button_text, callback_data=f'wallet_{wallet}'))
 
-        create_wallet_button = types.InlineKeyboardButton(text='Создать кошелек',
-                                                          callback_data='confirm_create_tron_wallet')
         back_button = types.InlineKeyboardButton(text='Вернуться в предыдущее меню',
                                                  callback_data='back_to_registration')
+        create_wallet_button = types.InlineKeyboardButton(text='Создать кошелек',
+                                                          callback_data='confirm_create_tron_wallet')
+        if summ_balance_usdt > 0:
+            balance_str = str(summ_balance_usdt)[:-6]
+            balance_formated = float(balance_str)
+        else:
+            balance_formated = 0
 
         session = Session()
         user = session.query(User).filter_by(telegram_id=callback_query.from_user.id).first()
@@ -109,6 +131,8 @@ async def my_wallets(callback_query: types.CallbackQuery):
                f'Ваш аккаунт:\n' \
                f'ID аккаунта: {user.telegram_id}\n' \
                f'Дата создания: {user.reg_date}\n' \
+               f'\n' \
+               f'Ваш баланс: {balance_formated:,.2f} USDT\n' \
                f'\n' \
                f'Ваши кошельки в системе Старого Грузина: '
 

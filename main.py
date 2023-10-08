@@ -26,49 +26,49 @@ Base.metadata.create_all(engine)
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-dp.register_message_handler(start, commands=['start'])  # [START]
-dp.register_callback_query_handler(register_wallet, text_contains='register')  # [REGISTER WALLET]
+dp.register_message_handler(start, commands=['start'])                                          # [START]
+dp.register_callback_query_handler(register_wallet, text_contains='register')                   # [REGISTER WALLET]
 dp.register_callback_query_handler(
     add_wallet_address,
-    lambda callback_query: callback_query.data == 'add_wallet_address')  # [ADD WALLET ADDRESS]
+    lambda callback_query: callback_query.data == 'add_wallet_address')                         # [ADD WALLET ADDRESS]
 dp.register_callback_query_handler(
     cancel_add_wallet_address,
     lambda callback_query: callback_query.data == 'cancel_add_wallet_address',
-    state=WalletRegistration.waiting_for_wallet_id)  # [CANCEL ADD WALLET ADDRESS]
+    state=WalletRegistration.waiting_for_wallet_id)                                        # [CANCEL ADD WALLET ADDRESS]
 dp.register_message_handler(save_wallet_address,
-                            state=WalletRegistration.waiting_for_wallet_id)  # [SAVE WALLET ADDRESS]
-dp.register_message_handler(wallets, text_contains='Кошелек')  # [WALLETS] reply
-dp.register_callback_query_handler(my_wallets, text_contains='mywallets')  # [MY WALLETS] inline
+                            state=WalletRegistration.waiting_for_wallet_id)                     # [SAVE WALLET ADDRESS]
+dp.register_message_handler(wallets, text_contains='Кошелек')                                   # [WALLETS] reply
+dp.register_callback_query_handler(my_wallets, text_contains='mywallets')                       # [MY WALLETS] inline
 dp.register_callback_query_handler(confirm_create_tron_wallet,
-                                   text_contains='confirm_create_tron_wallet')  # [CONFIRM CREATE TRON WALLET]
-dp.register_callback_query_handler(create_tron_wallet, text_contains='create_tron_wallet')  # [CREATE TRON WALLET]
+                                   text_contains='confirm_create_tron_wallet')            # [CONFIRM CREATE TRON WALLET]
+dp.register_callback_query_handler(create_tron_wallet, text_contains='create_tron_wallet')      # [CREATE TRON WALLET]
 dp.register_callback_query_handler(
     back_to_registration,
-    lambda callback_query: callback_query.data == 'back_to_registration')  # [BACK TO REGISTRATION]
-dp.register_callback_query_handler(click_wallet, lambda c: c.data.startswith('wallet_'))  # [CLICK WALLET]
-dp.register_callback_query_handler(edit_wallet_name, lambda c: c.data.startswith('edit_'))  # [EDIT WALLET NAME]
+    lambda callback_query: callback_query.data == 'back_to_registration')                       # [BACK TO REGISTRATION]
+dp.register_callback_query_handler(click_wallet, lambda c: c.data.startswith('wallet_'))        # [CLICK WALLET]
+dp.register_callback_query_handler(edit_wallet_name, lambda c: c.data.startswith('edit_'))      # [EDIT WALLET NAME]
 dp.register_callback_query_handler(
     cancel_edit_wallet_name,
     lambda c: c.data.startswith('cancel_edit_wallet_name_'),
-    state=WalletNameEdit.waiting_for_new_name)  # [CANCEL EDIT WALLET NAME]
+    state=WalletNameEdit.waiting_for_new_name)                                               # [CANCEL EDIT WALLET NAME]
 dp.register_callback_query_handler(get_wallet_address,
-                                   lambda c: c.data.startswith('get_address_'))  # [GET WALLET ADDRESS]
-dp.register_message_handler(save_wallet_name, state=WalletNameEdit.waiting_for_new_name)  # [SAVE WALLET NAME]
-dp.register_callback_query_handler(delete_wallet, lambda c: c.data.startswith('delete_'))  # [DELETE WALLET]
+                                   lambda c: c.data.startswith('get_address_'))                 # [GET WALLET ADDRESS]
+dp.register_message_handler(save_wallet_name, state=WalletNameEdit.waiting_for_new_name)        # [SAVE WALLET NAME]
+dp.register_callback_query_handler(delete_wallet, lambda c: c.data.startswith('delete_'))       # [DELETE WALLET]
 dp.register_callback_query_handler(confirm_delete_wallet,
-                                   text_contains='confirm_delete_')  # [CONFIRM DELETE WALLET]
-dp.register_callback_query_handler(share_wallet, lambda c: c.data.startswith('share_'))  # [SHARE WALLET]
+                                   text_contains='confirm_delete_')                            # [CONFIRM DELETE WALLET]
+dp.register_callback_query_handler(share_wallet, lambda c: c.data.startswith('share_'))         # [SHARE WALLET]
 dp.register_callback_query_handler(
     cancel_share_wallet,
     lambda c: c.data.startswith('cancel_share_wallet_'),
-    state=ShareWallet.waiting_for_trusted_username)  # [CANCEL SHARE WALLET]
+    state=ShareWallet.waiting_for_trusted_username)                                             # [CANCEL SHARE WALLET]
 dp.register_message_handler(save_trusted_user, state=ShareWallet.waiting_for_trusted_username)  # [SAVE TRUSTED USER]
 dp.register_callback_query_handler(trusted_users,
-                                   lambda c: c.data.startswith('trusted_users_'))  # [TRUSTED USERS]
+                                           lambda c: c.data.startswith('trusted_users_'))       # [TRUSTED USERS]
 dp.register_callback_query_handler(choice_remove_trusted_user,
-                                   lambda c: c.data.startswith('trusted_user_remove_'))  # [CHOICE REMOVE TRUSTED USER]
+                                   lambda c: c.data.startswith('trusted_user_remove_'))   # [CHOICE REMOVE TRUSTED USER]
 dp.register_callback_query_handler(remove_user,
-                                   lambda c: c.data.startswith('remove_'))  # [DELETE TRUSTED USER]
+                                   lambda c: c.data.startswith('remove_'))                      # [DELETE TRUSTED USER]
 
 
 # [SEND TRANSACTION]
