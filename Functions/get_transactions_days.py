@@ -38,15 +38,15 @@ for _ in range(0, pages):
         print(f"{num:>3} | {time_} | {f:>9.02f} {symbol} | {fr} > {to}")
 
 # создаем папку Reports, если ее нет
-if not os.path.exists(os.path.join("Reports", 'Days')):
-    os.makedirs(os.path.join("Reports", 'Days'))
+if not os.path.exists(os.path.join("../Reports", 'Days')):
+    os.makedirs(os.path.join("../Reports", 'Days'))
 
 # сохраняем каждый день в отдельный файл
 for day in transactions_by_day:
     print(day)
     date_str = str(day.get('date'))
     file_name = f"{account_id[:3]}_{date_str}.json"
-    file_path = os.path.join("Reports", 'Days', file_name)
+    file_path = os.path.join("../Reports", 'Days', file_name)
     with open(file_path, 'w') as f:
         json.dump(day.get('transactions'), f, indent=4)  # add indent argument to make it readable
 

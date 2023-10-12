@@ -40,14 +40,14 @@ for _ in range(0, pages):
 
         print(f"{num:>3} | {time_} | {f:>9.02f} {symbol} | {fr} > {to}")
 
-if not os.path.exists(os.path.join("Reports", 'Weeks')):
-    os.makedirs(os.path.join("Reports", 'Weeks'))
+if not os.path.exists(os.path.join("../Reports", 'Weeks')):
+    os.makedirs(os.path.join("../Reports", 'Weeks'))
 
 for week in transactions_by_week:
     week_start = week.get('week_start')
     week_end = (dt.datetime.strptime(week_start, '%Y-%m-%d') + dt.timedelta(days=6)).strftime('%Y-%m-%d')
     file_name = f"{account_id[:3]}_{week_start}_{week_end}.json"
-    file_path = os.path.join("Reports", 'Weeks', file_name)
+    file_path = os.path.join("../Reports", 'Weeks', file_name)
     transactions = week.get('transactions')
     print(f"Writing {len(transactions)} transactions to {file_path}")
 

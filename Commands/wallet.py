@@ -1,20 +1,13 @@
-from aiogram import Bot, Dispatcher, executor, types, filters
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.dispatcher import FSMContext
+from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import TOKEN, DB_URL
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from DataBase.Base import Base
 from DataBase.User import User
-from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
-from DataBase.Transaction import Transaction
-from datetime import datetime
-from aiocron import crontab
-import asyncio
 import logging
-from balance import get_balance_trx, get_balance_usdt
+from Functions.balance import get_balance_usdt
 
 
 logging.basicConfig(filename='bot.log', level=logging.INFO)

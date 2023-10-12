@@ -1,21 +1,12 @@
-from aiogram import Bot, Dispatcher, executor, types, filters
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.dispatcher import FSMContext
+from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from config import TOKEN, DB_URL
-from parser import parser_main
-import json
 import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from DataBase.Base import Base
 from DataBase.User import User
-from DataBase.Transaction import Transaction
-from DataBase.TrustedUser import TrustedUser
-from DataBase.WalletTron import WalletTron
 from datetime import datetime
-from aiocron import crontab
-import asyncio
 import logging
 
 

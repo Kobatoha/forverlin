@@ -1,7 +1,7 @@
 import json
 import datetime as dt
 
-file_path = "Reports/Weeks/TGz_2023-10-02_2023-10-08.json"
+file_path = "../Reports/Weeks/TGz_2023-10-02_2023-10-08.json"
 account_id = "TGzNdQBmFqisqsbSwEbBunoBegVQsYALRh"
 
 with open(file_path, 'r') as f:
