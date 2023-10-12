@@ -52,20 +52,44 @@ async def start(message: types.Message):
         session.close()
 
         if user:
-            menu_buttons = types.InlineKeyboardMarkup(row_width=2)
-            register_button = types.InlineKeyboardButton(text='Регистрация кошелька', callback_data='register')
-            my_wallets_button = types.InlineKeyboardButton(text='Мои кошельки', callback_data='mywallets')
-            menu_buttons.add(register_button, my_wallets_button)
+            if user.telegram_id == 952604184 or user.telegram_id == 5742872990:
+                wallet_button = types.KeyboardButton('Кошелек')
+                one_button = types.KeyboardButton('One')
+                two_button = types.KeyboardButton('Two')
+                three_button = types.KeyboardButton('Three')
+                admin_button = types.KeyboardButton('Админ')
+                start_keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True). \
+                    add(wallet_button, one_button, two_button, three_button).row(admin_button)
 
-            comeback_text = f'Добро пожаловать!\n' \
-                            f'\n' \
-                            f'Ваш аккаунт:\n' \
-                            f'ID аккаунта: {user.telegram_id}\n' \
-                            f'Дата создания: {user.reg_date}'
+                start_text = f'Вы - администратор. Зайти в панель администратора можно по кнопке - Админ\n' \
+                             f'\n' \
+                             f'Здесь должны быть:\n' \
+                             f'[   ] Списки всех пользователей обменника\n' \
+                             f'[   ] Список кошельков, зарегистрированных в обменнике\n' \
+                             f'[   ] Отчетность по операциям на кошельках\n' \
+                             f'[   ] Балансы адресов\n' \
+                             f'[   ] Запросы на перевод'
 
-            await bot.send_message(chat_id=message.from_user.id,
-                                   text=comeback_text,
-                                   reply_markup=menu_buttons)
+                await bot.send_message(chat_id=message.from_user.id,
+                                       text=start_text,
+                                       reply_markup=start_keyboard)
+
+            else:
+
+                menu_buttons = types.InlineKeyboardMarkup(row_width=2)
+                register_button = types.InlineKeyboardButton(text='Регистрация кошелька', callback_data='register')
+                my_wallets_button = types.InlineKeyboardButton(text='Мои кошельки', callback_data='mywallets')
+                menu_buttons.add(register_button, my_wallets_button)
+
+                comeback_text = f'Добро пожаловать!\n' \
+                                f'\n' \
+                                f'Ваш аккаунт:\n' \
+                                f'ID аккаунта: {user.telegram_id}\n' \
+                                f'Дата создания: {user.reg_date}'
+
+                await bot.send_message(chat_id=message.from_user.id,
+                                       text=comeback_text,
+                                       reply_markup=menu_buttons)
         else:
             register_button = types.InlineKeyboardButton(text='Регистрация кошелька', callback_data='register')
             menu_register = types.InlineKeyboardMarkup()

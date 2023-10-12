@@ -17,7 +17,7 @@ import asyncio
 
 logging.basicConfig(filename='bot.log', level=logging.INFO)
 
-engine = create_engine(DB_URL, pool_size=50, max_overflow=40)
+engine = create_engine(DB_URL, pool_size=100, max_overflow=100)
 
 Session = sessionmaker(bind=engine)
 
@@ -64,11 +64,15 @@ dp.register_callback_query_handler(
     state=ShareWallet.waiting_for_trusted_username)                                             # [CANCEL SHARE WALLET]
 dp.register_message_handler(save_trusted_user, state=ShareWallet.waiting_for_trusted_username)  # [SAVE TRUSTED USER]
 dp.register_callback_query_handler(trusted_users,
-                                           lambda c: c.data.startswith('trusted_users_'))       # [TRUSTED USERS]
+                                   lambda c: c.data.startswith('trusted_users_'))               # [TRUSTED USERS]
 dp.register_callback_query_handler(choice_remove_trusted_user,
                                    lambda c: c.data.startswith('trusted_user_remove_'))   # [CHOICE REMOVE TRUSTED USER]
 dp.register_callback_query_handler(remove_user,
                                    lambda c: c.data.startswith('remove_'))                      # [DELETE TRUSTED USER]
+dp.register_message_handler(admin, text_contains='Админ')                                       # [ADMIN] reply
+dp.register_callback_query_handler(admin_callback, text_contains='admin')                       # [ADMIN] inline
+dp.register_callback_query_handler(list_users, text_contains='list_users')                      # [LIST USERS]
+dp.register_callback_query_handler(click_user, lambda c: c.data.startswith('click_user_'))      # [CLICK USER]
 
 
 # [SEND TRANSACTION]
@@ -134,11 +138,12 @@ async def send_transaction_info():
 
 
 async def crontab_parser():
+    pass
     # Запускаем парсер каждую минуту
-    crontab('*/1 * * * *', func=parser_main)
+    # crontab('*/1 * * * *', func=parser_main)
 
     # Запускаем функцию send_transaction_info каждую минуту
-    crontab('*/1 * * * *', func=send_transaction_info)
+    # crontab('*/1 * * * *', func=send_transaction_info)
 
 
 async def send_error():

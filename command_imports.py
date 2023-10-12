@@ -20,3 +20,7 @@ from Commands.choice_remove_trusted_user import choice_remove_trusted_user
 from Commands.remove_trusted_user import remove_user
 from Commands.confirm_create_tron_wallet import confirm_create_tron_wallet
 from Commands.confirm_delete_wallet import confirm_delete_wallet
+
+from Admin.admin import admin, admin_callback
+from Admin.list_users import list_users
+from Admin.click_user import click_user
