@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from DataBase.Base import Base
 from DataBase.User import User
+from DataBase.WalletTron import WalletTron
 import asyncio
 
 
@@ -17,28 +18,26 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
 
-# [LIST USERS]
-async def list_users(callback_query: types.CallbackQuery):
+# [LIST WALLETS]  callback_data='list_wallets')
+async def list_wallets(callback_query: types.CallbackQuery):
     try:
         session = Session()
-        users = session.query(User).all()
+        wallets = session.query(WalletTron).all()
         session.close()
 
-        buttons = []
-        users_count = 0
+        wallets_count = 0
 
-        for user in users:
-            users_count += 1
-            button_text = f'«{user.telegram_id}» - {user.username}, дата регистрации: {user.reg_date}'
-            buttons.append(types.InlineKeyboardButton(text=button_text, callback_data=f'click_user_{user.telegram_id}'))
+        for wallet in wallets:
+            if wallet:
+                wallets_count += 1
 
         text = f'[Вы находитесь в панели администратора]\n' \
                f'\n'\
-               f'Всего зарегистрировано {users_count} пользователей.\n'\
-               f'[ 🐰 ] Список всех пользователей обменника:\n'\
+               f'[ 🦊 ] Всего кошельков: {wallets_count}\n'\
+               f'[ 🦊 ] Общий баланс: 0.00\n'\
 
         button_back = types.InlineKeyboardButton(text='Вернуться назад', callback_data='admin')
-        reply_markup = types.InlineKeyboardMarkup(row_width=1).add(*buttons, button_back)
+        reply_markup = types.InlineKeyboardMarkup(row_width=1).add(button_back)
 
         await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                     message_id=callback_query.message.message_id,
@@ -47,5 +46,5 @@ async def list_users(callback_query: types.CallbackQuery):
 
     except Exception as e:
         await bot.send_message(chat_id='952604184',
-                               text=f'[LIST USERS] {callback_query.from_user.id} - '
-                                    f'Произошла ошибка в функции list_users: {e}')
+                               text=f'[LIST WALLETS] {callback_query.from_user.id} - '
+                                    f'Произошла ошибка в функции list_wallets: {e}')

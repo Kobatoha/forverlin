@@ -18,7 +18,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
 
-# [CLICK USER] lambda c: c.data.startswith('click_user_')
+# [CLICK USER]
 async def click_user(callback_query: types.CallbackQuery):
     try:
         user_id = callback_query.data.split('_')[2]
@@ -39,7 +39,7 @@ async def click_user(callback_query: types.CallbackQuery):
                 button_text = f'«{wallet.wallet_name}» - {wallet.wallet_address[:3]}...{wallet.wallet_address[-3:]}'
                 buttons.append(types.InlineKeyboardButton(
                     text=button_text,
-                    callback_data=f'click_user_{user_id}_{wallet.wallet_address}'))
+                    callback_data=f'click_wallet_user_{wallet.wallet_address}'))
 
         text = f'[Пользователь «{user_id}» - {user.username}]\n' \
                f'\n'\

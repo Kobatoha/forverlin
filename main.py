@@ -71,6 +71,9 @@ dp.register_message_handler(admin, text_contains='Админ')                  
 dp.register_callback_query_handler(admin_callback, text_contains='admin')                       # [ADMIN] inline
 dp.register_callback_query_handler(list_users, text_contains='list_users')                      # [LIST USERS]
 dp.register_callback_query_handler(click_user, lambda c: c.data.startswith('click_user_'))      # [CLICK USER]
+dp.register_callback_query_handler(click_user_wallet,
+                                   lambda c: c.data.startswith('click_wallet_user_'))           # [CLICK USER WALLET]
+dp.register_callback_query_handler(list_wallets, text_contains='list_wallets')                  # [LIST WALLETS]
 
 
 # [SEND TRANSACTION]
@@ -136,9 +139,8 @@ async def send_transaction_info():
 
 
 async def crontab_parser():
-    pass
     # Запускаем парсер каждую минуту
-    # crontab('*/1 * * * *', func=parser_main)
+    crontab('*/1 * * * *', func=parser_main)
 
     # Запускаем функцию send_transaction_info каждую минуту
     # crontab('*/1 * * * *', func=send_transaction_info)

@@ -24,3 +24,5 @@ from Commands.confirm_delete_wallet import confirm_delete_wallet
 from Admin.admin import admin, admin_callback
 from Admin.list_users import list_users
 from Admin.click_user import click_user
+from Admin.click_user_wallet import click_user_wallet
+from Admin.list_wallets import list_wallets
