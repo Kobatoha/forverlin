@@ -30,12 +30,15 @@ async def click_user_wallet(callback_query: types.CallbackQuery):
 
         balance_ = await get_balance_usdt(wallet_address)
         if not balance_:
-            balance_ = 0.00
+            balance_formated = 0
+        else:
+            balance_str = str(balance_)[:-6]
+            balance_formated = float(balance_str)
 
         text = f'[Пользователь «{user.telegram_id}» - {user.username} - кошелек «{wallet_address}»]\n' \
                f'\n'\
                f'[ 🐰 ] Протокол: trc20\n' \
-               f'[ 🐰 ] Баланс: {balance_}\n' \
+               f'[ 🐰 ] Баланс: {balance_formated:,.2f}\n' \
                f'[ 🐰 ] Только для чтения: {wallet.only_watch}\n'\
                f'[ 🐰 ] Запросов на обмен: 0\n' \
                f'[ 🐰 ] Запросов на вывод: 0\n' \

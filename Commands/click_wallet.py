@@ -14,6 +14,7 @@ from datetime import datetime
 from aiocron import crontab
 import asyncio
 import logging
+from Functions.balance import get_balance_usdt
 
 
 logging.basicConfig(filename='bot.log', level=logging.INFO)
@@ -32,6 +33,12 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 async def click_wallet(callback_query: types.CallbackQuery):
     try:
         wallet_address = callback_query.data.split('_')[1]
+        balance_ = await get_balance_usdt(wallet_address)
+        if not balance_:
+            balance_formated = 0
+        else:
+            balance_str = str(balance_)[:-6]
+            balance_formated = float(balance_str)
 
         buttons = [
             types.InlineKeyboardButton(text='Получить адрес', callback_data=f'get_address_{wallet_address}'),
@@ -49,7 +56,9 @@ async def click_wallet(callback_query: types.CallbackQuery):
         session.close()
 
         if wallet_name:
-            text = f'Выберите действие с кошельком «{wallet_name}» - «{wallet_address}»:'
+            text = f'Баланс: {balance_formated:,.2f}\n' \
+                   f'\n' \
+                   f'Выберите действие с кошельком «{wallet_name}» - «{wallet_address}»:'
             await bot.edit_message_text(chat_id=callback_query.message.chat.id,
                                         message_id=callback_query.message.message_id,
                                         text=text,
