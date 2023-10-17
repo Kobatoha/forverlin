@@ -1,5 +1,5 @@
 import time
-
+import requests
 import aiohttp
 import asyncio
 import gzip
@@ -46,6 +46,7 @@ async def get_data(url):
                 async with session.get(
                         f"https://apilist.tronscanapi.com/api/token_trc20/transfers?limit=3&start=0&sort="
                         f"-timestamp&count=true&filterTokenValue=0&relatedAddress={wallet_address}") as response:
+                    print(await response.text())
                     if response.status == 200:
 
                         parsed_data = await response.json()

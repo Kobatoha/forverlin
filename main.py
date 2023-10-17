@@ -143,7 +143,7 @@ async def crontab_parser():
     crontab('*/1 * * * *', func=parser_main)
 
     # Запускаем функцию send_transaction_info каждую минуту
-    # crontab('*/1 * * * *', func=send_transaction_info)
+    crontab('*/1 * * * *', func=send_transaction_info)
 
 
 async def send_error():
