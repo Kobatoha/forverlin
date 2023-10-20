@@ -9,11 +9,9 @@ from DataBase.TrustedUser import TrustedUser
 from DataBase.WalletTron import WalletTron
 from DataBase.Transaction import Transaction
 from datetime import datetime
-import logging
 from command_imports import *
 import asyncio
-
-logging.basicConfig(filename='bot.log', level=logging.INFO)
+from aiocron import crontab
 
 engine = create_engine(DB_URL, pool_size=100, max_overflow=100)
 
@@ -133,7 +131,6 @@ async def send_transaction_info():
         session.close()
 
     except Exception as error:
-        logging.error(f'Ошибка в функции send_transaction_info: {error}')
         await bot.send_message(chat_id='952604184',
                                text=f'Произошла ошибка в функции send_transaction_info: {error}')
 
@@ -141,9 +138,11 @@ async def send_transaction_info():
 async def crontab_parser():
     # Запускаем парсер каждую минуту
     crontab('*/1 * * * *', func=parser_main)
+    print('Запустили парсер')
 
     # Запускаем функцию send_transaction_info каждую минуту
     crontab('*/1 * * * *', func=send_transaction_info)
+    print('Запустили send_transaction')
 
 
 async def send_error():
