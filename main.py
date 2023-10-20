@@ -77,6 +77,9 @@ dp.register_callback_query_handler(list_wallets, text_contains='list_wallets')  
 # [SEND TRANSACTION]
 async def send_transaction_info():
     try:
+        print('Start trans')
+        today = datetime.today().date()
+        print(today)
         session = Session()
 
         users = session.query(WalletTron).all()
@@ -84,13 +87,15 @@ async def send_transaction_info():
             transactions = session.query(Transaction).filter(Transaction.wallet_address == user.wallet_address,
                                                              Transaction.to_address == user.wallet_address,
                                                              Transaction.token_abbr == 'USDT',
-                                                             Transaction.send_message.is_(False)).all()
+                                                             Transaction.send_message.is_(False),
+                                                             Transaction.date == today).all()
 
             for transaction in transactions:
                 count = transaction.count
+                print(transaction.wallet_address, '->', transaction.token_abbr, count)
                 message_text = None
                 if len(count) > 9:
-                    logging.info(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
+                    print(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
                     if count[-6:] == '000000':
                         count = count[:-9] + ',' + count[-9:-6]
                     else:
@@ -98,19 +103,21 @@ async def send_transaction_info():
                     message_text = f"{user.wallet_name}: +{count} USDT"
 
                 elif len(count) == 9:
-                    logging.info(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
+                    print(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
                     count = count[:3]
                     message_text = f"{user.wallet_name}: +{count} USDT"
 
                 elif len(count) == 8:
-                    logging.info(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
+                    print(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
                     count = count[:2]
                     message_text = f"{user.wallet_name}: +{count} USDT"
 
                 elif len(count) == 7:
-                    logging.info(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
+                    print(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
                     count = count[:1]
                     message_text = f"{user.wallet_name}: +{count} USDT"
+
+                print(message_text)
 
                 if message_text:
                     trust_users = session.query(TrustedUser).filter_by(wallet_address=user.wallet_address).all()
@@ -124,8 +131,6 @@ async def send_transaction_info():
                             await bot.send_message(chat_id=chat_id, text=message_text)
 
                     await bot.send_message(chat_id=user.telegram_id, text=message_text)
-                    logging.info(f'[SEND TRANSACTION] Пользователь {user.telegram_id} - '
-                                 f'получил сообщение о транзакции: {message_text}')
                     transaction.send_message = True
                     session.commit()
         session.close()
