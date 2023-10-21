@@ -82,10 +82,9 @@ async def send_transaction_info():
         print(today)
         session = Session()
 
-        users = session.query(WalletTron).all()
-        for user in users:
-            transactions = session.query(Transaction).filter(Transaction.wallet_address == user.wallet_address,
-                                                             Transaction.to_address == user.wallet_address,
+        wallets = session.query(WalletTron).all()
+        for wallet in wallets:
+            transactions = session.query(Transaction).filter(Transaction.to_address == wallet.wallet_address,
                                                              Transaction.token_abbr == 'USDT',
                                                              Transaction.send_message.is_(False),
                                                              Transaction.date == today).all()
@@ -95,32 +94,32 @@ async def send_transaction_info():
                 print(transaction.wallet_address, '->', transaction.token_abbr, count)
                 message_text = None
                 if len(count) > 9:
-                    print(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
+                    print(f'[SEND TRANSACTION] {wallet.wallet_name} - add {transaction.count}')
                     if count[-6:] == '000000':
                         count = count[:-9] + ',' + count[-9:-6]
                     else:
                         count = count[:-9] + ',' + count[-9:-6] + '.' + count[-6:]
-                    message_text = f"{user.wallet_name}: +{count} USDT"
+                    message_text = f"{wallet.wallet_name}: +{count} USDT"
 
                 elif len(count) == 9:
-                    print(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
+                    print(f'[SEND TRANSACTION] {wallet.wallet_name} - add {transaction.count}')
                     count = count[:3]
-                    message_text = f"{user.wallet_name}: +{count} USDT"
+                    message_text = f"{wallet.wallet_name}: +{count} USDT"
 
                 elif len(count) == 8:
-                    print(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
+                    print(f'[SEND TRANSACTION] {wallet.wallet_name} - add {transaction.count}')
                     count = count[:2]
-                    message_text = f"{user.wallet_name}: +{count} USDT"
+                    message_text = f"{wallet.wallet_name}: +{count} USDT"
 
                 elif len(count) == 7:
-                    print(f'[SEND TRANSACTION] {user.wallet_name} - add {transaction.count}')
+                    print(f'[SEND TRANSACTION] {wallet.wallet_name} - add {transaction.count}')
                     count = count[:1]
-                    message_text = f"{user.wallet_name}: +{count} USDT"
+                    message_text = f"{wallet.wallet_name}: +{count} USDT"
 
                 print(message_text)
 
                 if message_text:
-                    trust_users = session.query(TrustedUser).filter_by(wallet_address=user.wallet_address).all()
+                    trust_users = session.query(TrustedUser).filter_by(wallet_address=wallet.wallet_address).all()
 
                     for trusted_user in trust_users:
                         in_all_user = session.query(User).filter_by(username=trusted_user.username[1:]).first()
@@ -130,7 +129,7 @@ async def send_transaction_info():
                             chat_id = in_all_user.telegram_id
                             await bot.send_message(chat_id=chat_id, text=message_text)
 
-                    await bot.send_message(chat_id=user.telegram_id, text=message_text)
+                    await bot.send_message(chat_id=wallet.telegram_id, text=message_text)
                     transaction.send_message = True
                     session.commit()
         session.close()
