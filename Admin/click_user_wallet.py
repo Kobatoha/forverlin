@@ -7,6 +7,7 @@ from DataBase.User import User
 from DataBase.WalletTron import WalletTron
 import asyncio
 from Functions.balance import get_balance_usdt
+import datetime
 
 
 engine = create_engine(DB_URL, pool_size=50, max_overflow=40)
@@ -44,8 +45,15 @@ async def click_user_wallet(callback_query: types.CallbackQuery):
                f'[ 🐰 ] Запросов на вывод: 0\n' \
                f'[ 🐰 ] Еще что-нибудь: 0'\
 
-        button_back = types.InlineKeyboardButton(text='Вернуться назад', callback_data=f'click_user_{user.telegram_id}')
-        reply_markup = types.InlineKeyboardMarkup(row_width=1).add(button_back)
+        today = datetime.date.today()
+        yesterday = today - datetime.timedelta(days=1)
+        button_report = types.InlineKeyboardButton(
+            text=f'Отчет за {yesterday.strftime("%Y-%m-%d")}',
+            callback_data=f'repotr_{wallet_address}_{yesterday.strftime("%Y-%m-%d")}')
+        button_back = types.InlineKeyboardButton(
+            text='Вернуться назад',
+            callback_data=f'click_user_{user.telegram_id}')
+        reply_markup = types.InlineKeyboardMarkup(row_width=1).add(button_report, button_back)
 
         await bot.edit_message_text(chat_id=callback_query.from_user.id,
                                     message_id=callback_query.message.message_id,
