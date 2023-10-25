@@ -9,3 +9,5 @@ db_name = 'forverlin'
 port = 5433
 
 DB_URL = f'postgresql://{user}:{password}@{host}:{port}/{db_name}'
+
+trongrid_api_key = '88b905ca-b432-4f4e-bd6a-09ed49629c4a'
