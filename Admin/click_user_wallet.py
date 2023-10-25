@@ -49,7 +49,7 @@ async def click_user_wallet(callback_query: types.CallbackQuery):
         yesterday = today - datetime.timedelta(days=1)
         button_report = types.InlineKeyboardButton(
             text=f'Отчет за {yesterday.strftime("%Y-%m-%d")}',
-            callback_data=f'repotr_{wallet_address}_{yesterday.strftime("%Y-%m-%d")}')
+            callback_data=f'report_yesterday_{wallet_address}')
         button_back = types.InlineKeyboardButton(
             text='Вернуться назад',
             callback_data=f'click_user_{user.telegram_id}')

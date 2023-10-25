@@ -35,11 +35,11 @@ async def click_user(callback_query: types.CallbackQuery):
             wallets_address_count += 1
             if wallet.only_watch:
                 wallets_address_only_watch += 1
-            else:
-                button_text = f'«{wallet.wallet_name}» - {wallet.wallet_address[:3]}...{wallet.wallet_address[-3:]}'
-                buttons.append(types.InlineKeyboardButton(
-                    text=button_text,
-                    callback_data=f'click_wallet_user_{wallet.wallet_address}'))
+            # else:
+            button_text = f'«{wallet.wallet_name}» - {wallet.wallet_address[:3]}...{wallet.wallet_address[-3:]}'
+            buttons.append(types.InlineKeyboardButton(
+                text=button_text,
+                callback_data=f'click_wallet_user_{wallet.wallet_address}'))
 
         text = f'[Пользователь «{user_id}» - {user.username}]\n' \
                f'\n'\

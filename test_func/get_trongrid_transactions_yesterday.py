@@ -4,10 +4,11 @@ from config import trongrid_api_key
 import asyncio
 
 
-async def get_trongrid_transactions_yesterday(wallet_address, wallet_name):
+async def get_trongrid_transactions_yesterday(wallet_address):
+    print('start get_trongrid_transactions_yesterday')
     api_key = trongrid_api_key
     wallet_address = wallet_address
-    wallet_name = wallet_name
+    print(wallet_address)
 
     today = dt.datetime.now().date()
     yesterday = today - dt.timedelta(days=1)
@@ -33,7 +34,7 @@ async def get_trongrid_transactions_yesterday(wallet_address, wallet_name):
     response = requests.get(url, params=params, headers=headers)
     num = 0
     reports = []
-    text = f'{yesterday.strftime("%y-%m-%d")} {wallet_name}: [{wallet_address[:3]}_{wallet_address[-3:]}]\nToken: USDT\n'
+    text = f'Отчет за {yesterday.strftime("%y-%m-%d")}\nКошелек: {wallet_address}\nМонета: USDT\n'
 
     if response.status_code == 200:
         transactions = response.json()["data"]
@@ -47,16 +48,17 @@ async def get_trongrid_transactions_yesterday(wallet_address, wallet_name):
             f = float(v[:dec] + '.' + v[dec:])
             time_ = dt.datetime.fromtimestamp(float(tr.get('block_timestamp', '')) / 1000)
             if fr != wallet_address:
-                reports.append(f"{time_.strftime('%H:%M')}: +{f:>9,.02f} from {fr[:3]}_{fr[-3:]}")
+                reports.append(f"{time_.strftime('%H:%M')}:  +{f:,.02f}  from  {fr[:3]}_{fr[-3:]}")
             else:
-                reports.append(f"{time_.strftime('%H:%M')}: -{f:>9,.02f} to   {to[:3]}_{to[-3:]}")
+                reports.append(f"{time_.strftime('%H:%M')}:  -{f:,.02f}  to  {to[:3]}_{to[-3:]}")
     else:
         print(f"Error: {response.status_code} - {response.text}")
 
     for i in reports:
         text += i + '\n'
 
-    print(text)
+    return text
+
 
 if __name__ == '__main__':
-    asyncio.run(get_trongrid_transactions_yesterday('TGzNdQBmFqisqsbSwEbBunoBegVQsYALRh', 'рабочий'))
+    asyncio.run(get_trongrid_transactions_yesterday('TGzNdQBmFqisqsbSwEbBunoBegVQsYALRh'))

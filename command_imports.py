@@ -27,3 +27,4 @@ from Admin.list_users import list_users
 from Admin.click_user import click_user
 from Admin.click_user_wallet import click_user_wallet
 from Admin.list_wallets import list_wallets
+from Admin.report_wallet_yesterday import report_wallet_yesterday

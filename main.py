@@ -72,6 +72,8 @@ dp.register_callback_query_handler(click_user, lambda c: c.data.startswith('clic
 dp.register_callback_query_handler(click_user_wallet,
                                    lambda c: c.data.startswith('click_wallet_user_'))           # [CLICK USER WALLET]
 dp.register_callback_query_handler(list_wallets, text_contains='list_wallets')                  # [LIST WALLETS]
+dp.register_callback_query_handler(report_wallet_yesterday,
+                                   lambda c: c.data.startswith('report_yesterday_'))         # [REPORT WALLET YESTERDAY]
 
 
 # [SEND TRANSACTION]
@@ -93,28 +95,10 @@ async def send_transaction_info():
                 count = transaction.count
                 print(transaction.wallet_address, '->', transaction.token_abbr, count)
                 message_text = None
-                if len(count) > 9:
+                if len(count) > 6:
                     print(f'[SEND TRANSACTION] {wallet.wallet_name} - add {transaction.count}')
-                    if count[-6:] == '000000':
-                        count = count[:-9] + ',' + count[-9:-6]
-                    else:
-                        count = count[:-9] + ',' + count[-9:-6] + '.' + count[-6:]
-                    message_text = f"{wallet.wallet_name}: +{count} USDT"
-
-                elif len(count) == 9:
-                    print(f'[SEND TRANSACTION] {wallet.wallet_name} - add {transaction.count}')
-                    count = count[:3]
-                    message_text = f"{wallet.wallet_name}: +{count} USDT"
-
-                elif len(count) == 8:
-                    print(f'[SEND TRANSACTION] {wallet.wallet_name} - add {transaction.count}')
-                    count = count[:2]
-                    message_text = f"{wallet.wallet_name}: +{count} USDT"
-
-                elif len(count) == 7:
-                    print(f'[SEND TRANSACTION] {wallet.wallet_name} - add {transaction.count}')
-                    count = count[:1]
-                    message_text = f"{wallet.wallet_name}: +{count} USDT"
+                    count = float(count[:-6])
+                    message_text = f"{wallet.wallet_name}: +{count:,.2f} USDT"
 
                 print(message_text)
 
