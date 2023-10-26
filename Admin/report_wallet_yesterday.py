@@ -1,13 +1,9 @@
-from aiogram import Bot, Dispatcher, executor, types, filters
+from aiogram import Bot, Dispatcher, types
 from config import DB_URL, TOKEN
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from DataBase.Base import Base
-from DataBase.User import User
-from DataBase.WalletTron import WalletTron
-import asyncio
-import datetime
-from test_func.get_trongrid_transactions_yesterday import get_trongrid_transactions_yesterday
+from Functions.get_trongrid_transactions_yesterday import get_trongrid_transactions_yesterday
 
 
 engine = create_engine(DB_URL, pool_size=50, max_overflow=40)
